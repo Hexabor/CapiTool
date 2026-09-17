@@ -1,0 +1,11 @@
+# Copia de OmniTool v1 para consulta local; no se publica
+v1-reference/
+
+# clasp / node
+node_modules/
+.clasprc.json
+
+# SO / editores
+.DS_Store
+Thumbs.db
+.vscode/

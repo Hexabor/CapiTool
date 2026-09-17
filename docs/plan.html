@@ -1,0 +1,605 @@
+<title>CapiTool 2.0</title>
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --surface: #ffffff;
+    --surface-2: #eef3fa;
+    --border: #d9e1ec;
+    --border-strong: #b9c6d8;
+    --text: #17202b;
+    --text-2: #4b5a6c;
+    --text-3: #7b8899;
+    --primary: #2563eb;
+    --primary-soft: #dbe7fd;
+    --primary-text: #1d4ed8;
+    --ok: #15803d;
+    --ok-soft: #dcf5e4;
+    --warn: #b45309;
+    --warn-soft: #fdecd2;
+    --crit: #b91c1c;
+    --crit-soft: #fde2e2;
+    --code-bg: #eef2f7;
+    --shadow: 0 1px 2px rgba(23, 32, 43, .06), 0 4px 12px rgba(23, 32, 43, .05);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f151d; --surface: #161e29; --surface-2: #1c2634; --border: #2a3644; --border-strong: #3b4a5c;
+      --text: #e6ecf3; --text-2: #b3bfcd; --text-3: #7f8da0;
+      --primary: #5b8def; --primary-soft: #1e2f4d; --primary-text: #8fb3ff;
+      --ok: #4ade80; --ok-soft: #14301f; --warn: #fbbf24; --warn-soft: #3a2a0c; --crit: #f87171; --crit-soft: #3d1717;
+      --code-bg: #1c2634; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f151d; --surface: #161e29; --surface-2: #1c2634; --border: #2a3644; --border-strong: #3b4a5c;
+    --text: #e6ecf3; --text-2: #b3bfcd; --text-3: #7f8da0;
+    --primary: #5b8def; --primary-soft: #1e2f4d; --primary-text: #8fb3ff;
+    --ok: #4ade80; --ok-soft: #14301f; --warn: #fbbf24; --warn-soft: #3a2a0c; --crit: #f87171; --crit-soft: #3d1717;
+    --code-bg: #1c2634; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.55; padding-inline: 16px; padding-block: 0 64px; }
+  a { color: var(--primary-text); }
+  h1, h2, h3, h4 { text-wrap: balance; line-height: 1.2; margin: 0; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: .86em; background: var(--code-bg); padding: .1em .38em; border-radius: 4px; }
+  pre { font-family: var(--mono); font-size: .8rem; background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .8rem 1rem; overflow-x: auto; margin: 0; line-height: 1.5; }
+
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  /* Header */
+  .hdr { padding-block: 40px 28px; border-bottom: 1px solid var(--border); display: grid; gap: 10px; }
+  .eyebrow { font-size: .74rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--primary-text); }
+  .hdr h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); font-weight: 700; letter-spacing: -.01em; }
+  .hdr .lead { color: var(--text-2); max-width: 68ch; font-size: 1.02rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: .82rem; color: var(--text-3); margin-top: 4px; }
+  .meta b { color: var(--text-2); font-weight: 600; }
+
+  /* TOC */
+  .toc { display: flex; flex-wrap: wrap; gap: 6px; padding-block: 16px; border-bottom: 1px solid var(--border); position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 5; }
+  .toc a { font-size: .78rem; text-decoration: none; color: var(--text-2); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+  .toc a:hover { border-color: var(--primary); color: var(--primary-text); }
+
+  /* Sections */
+  section { padding-block: 36px 8px; }
+  section > h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: baseline; gap: 12px; }
+  section > h2 .n { font-family: var(--mono); font-size: .8rem; color: var(--text-3); font-weight: 500; }
+  section > .intro { color: var(--text-2); max-width: 70ch; margin-bottom: 18px; }
+  h3 { font-size: 1.02rem; font-weight: 650; margin-top: 22px; margin-bottom: 8px; }
+  h4 { font-size: .9rem; font-weight: 650; margin-bottom: 4px; }
+  ul, ol { margin: 6px 0 0; padding-left: 1.25rem; }
+  li { margin-bottom: 4px; }
+  li::marker { color: var(--text-3); }
+  .muted { color: var(--text-3); }
+  .small { font-size: .84rem; }
+
+  /* Tables */
+  .tbl { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); font-weight: 600; background: var(--surface-2); }
+  tr:last-child td { border-bottom: 0; }
+  td.k { font-weight: 600; white-space: nowrap; }
+  td code { white-space: nowrap; }
+
+  /* Pills */
+  .pill { display: inline-block; font-size: .7rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; letter-spacing: .02em; white-space: nowrap; }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.crit { background: var(--crit-soft); color: var(--crit); }
+  .pill.blue { background: var(--primary-soft); color: var(--primary-text); }
+  .pill.grey { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+
+  /* Cards */
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .card h4 { display: flex; align-items: center; gap: 8px; }
+  .card p, .card li { font-size: .88rem; color: var(--text-2); }
+  .card ul { padding-left: 1.1rem; }
+
+  /* Architecture diagram */
+  .arch { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .layer { display: grid; grid-template-columns: 120px 1fr; border-bottom: 1px solid var(--border); }
+  .layer:last-child { border-bottom: 0; }
+  .layer .lbl { padding: 14px; background: var(--surface-2); border-right: 1px solid var(--border); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); font-weight: 600; }
+  .layer .lbl small { display: block; text-transform: none; letter-spacing: 0; font-weight: 500; margin-top: 4px; color: var(--text-3); }
+  .layer .boxes { padding: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; }
+  .box { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 8px 12px; font-size: .84rem; min-width: 130px; flex: 1 1 140px; background: var(--surface); }
+  .box b { display: block; font-size: .86rem; }
+  .box span { color: var(--text-3); font-size: .76rem; display: block; }
+  .box.hub { border-color: var(--primary); background: var(--primary-soft); }
+  .box.core { border-style: dashed; }
+  .link { display: grid; grid-template-columns: 120px 1fr; }
+  .link .lbl { background: transparent; border-right: 1px solid var(--border); }
+  .link .txt { padding: 6px 14px; font-size: .78rem; color: var(--text-3); font-family: var(--mono); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface-2); }
+  @media (max-width: 560px) {
+    .layer, .link { grid-template-columns: 1fr; }
+    .layer .lbl, .link .lbl { border-right: 0; border-bottom: 1px solid var(--border); }
+  }
+
+  /* Phases */
+  .phase { display: grid; grid-template-columns: 56px 1fr; gap: 0 16px; padding: 18px 0; border-top: 1px solid var(--border); }
+  .phase:last-of-type { border-bottom: 1px solid var(--border); }
+  .phase .num { font-family: var(--mono); font-size: 1.3rem; font-weight: 600; color: var(--primary-text); line-height: 1; padding-top: 3px; }
+  .phase .num small { display: block; font-size: .62rem; color: var(--text-3); font-weight: 500; margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+  .phase h3 { margin-top: 0; font-size: 1.08rem; }
+  .phase .goal { color: var(--text-2); font-size: .92rem; margin-bottom: 8px; }
+  .phase ol { font-size: .9rem; }
+  .phase .done { margin-top: 10px; font-size: .84rem; padding: 8px 12px; border-left: 3px solid var(--ok); background: var(--ok-soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text); }
+  .phase .done b { color: var(--ok); }
+  .phase .deps { font-size: .78rem; color: var(--text-3); margin-top: 6px; }
+  @media (max-width: 560px) { .phase { grid-template-columns: 1fr; } .phase .num { margin-bottom: 4px; } }
+
+  /* Callouts */
+  .note { border: 1px solid var(--border); border-left: 3px solid var(--primary); background: var(--surface); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 10px 14px; font-size: .88rem; color: var(--text-2); margin-top: 12px; }
+  .note b { color: var(--text); }
+  .note.warn { border-left-color: var(--warn); }
+
+  /* Checklist */
+  .chk { list-style: none; padding-left: 0; }
+  .chk li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: .9rem; }
+  .chk li:last-child { border-bottom: 0; }
+  .chk li::before { content: ""; width: 14px; height: 14px; border: 1.5px solid var(--border-strong); border-radius: 3px; margin-top: 4px; }
+  .sub { color: var(--text-3); font-size: .82rem; display: block; }
+
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: .8rem; color: var(--text-3); }
+  @media print { .toc { display: none; } body { background: #fff; } }
+</style>
+
+<div class="wrap">
+  <header class="hdr">
+    <div class="eyebrow">CapiTool · versión 2.0 · plan de proyecto</div>
+    <h1>CapiTool 2.0: hub de módulos con backend en Google Sheets</h1>
+    <p class="lead">Plan para reconstruir CapiTool como un hub que enlaza módulos independientes, activables por tienda desde un panel de administración, con login de Google y los datos en Google Sheets dentro de Drive. Se hace en un repositorio nuevo (<code>Hexabor/CapiTool</code>); la v1 (Firestore) queda congelada y se migra cuando decidamos.</p>
+    <div class="meta">
+      <span><b>Fecha</b> 17 sept 2026</span>
+      <span><b>Estado</b> v2 · arranque preparado en <code>D:\1. Proyectos\CapiTool2</code></span>
+      <span><b>Origen</b> OmniTool v0.x (6 módulos, Firestore, GitHub Pages)</span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <a href="#decisiones">Decisiones</a>
+    <a href="#arquitectura">Arquitectura</a>
+    <a href="#datos">Modelo de datos</a>
+    <a href="#api">API</a>
+    <a href="#core">Core</a>
+    <a href="#hub">Hub</a>
+    <a href="#fases">Fases</a>
+    <a href="#migracion">Migración v1→v2</a>
+    <a href="#riesgos">Riesgos</a>
+    <a href="#pendientes">Pendientes</a>
+    <a href="#arranque">Arranque</a>
+  </nav>
+
+  <!-- 1. DECISIONES -->
+  <section id="decisiones">
+    <h2><span class="n">01</span>Decisiones tomadas</h2>
+    <p class="intro">Resultado del interrogatorio. Todo lo que sigue en el plan se deriva de esta tabla; si cambia algo aquí, cambia el plan.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Tema</th><th>Decisión</th><th>Consecuencia</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Backend</td><td>Google Sheets en Drive, accedido solo a través de un Apps Script publicado como web app</td><td>Sin Firebase. Latencia de 0,3–1,5 s por llamada; la UI tiene que ser optimista y con cola local.</td></tr>
+          <tr><td class="k">Organización de datos</td><td>Un Sheet <b>maestro</b> (config, tiendas, usuarios, activación) + <b>un Sheet por tienda</b> con una pestaña por módulo</td><td>Datos aislados por tienda, sin riesgo de límite de celdas, fácil de dar acceso de lectura a una tienda a su propio archivo.</td></tr>
+          <tr><td class="k">Código</td><td><b>Un solo repo</b> <code>Hexabor/CapiTool</code> con carpetas <code>/hub</code>, <code>/core</code>, <code>/modules/*</code>, <code>/backend</code></td><td>Un GitHub Pages (<code>hexabor.github.io/CapiTool/</code>), un commit. Se descartó repo por módulo: la activación por tienda no depende de cómo estén los repos, y 9 repos era mantenimiento sin beneficio para una persona.</td></tr>
+          <tr><td class="k">Código común</td><td>Carpeta <code>/core</code> importada por ruta relativa (<code>../../core/core.js</code>)</td><td>Un fix en core llega a todos los módulos en el mismo commit. Sin versionado por URL.</td></tr>
+          <tr><td class="k">Cuenta propietaria</td><td><code>abeatrice@webuy.com</code> (Google Workspace). Dueña del Drive, del Apps Script y del proyecto de Cloud; primer admin de CapiTool</td><td>Los datos viven en la cuenta corporativa. Hay que comprobar que las políticas de Workspace permiten web apps públicas de Apps Script (ver riesgos).</td></tr>
+          <tr><td class="k">Login</td><td><b>Cuenta de Google</b> (Google Identity Services). Todas las cuentas son <code>@webuy.com</code>. Cada cuenta se asocia a una tienda; los miembros aprobados de una tienda aprueban a los nuevos</td><td>OAuth <b>interno</b>: sin verificación de Google ni límite de usuarios de prueba. El backend exige <code>hd == webuy.com</code>.</td></tr>
+          <tr><td class="k">Roles</td><td><b>tienda</b> y <b>admin</b>. El admin ve todas las tiendas y puede nombrar otros admins</td><td>Dos caminos en el hub: vista tienda y panel admin. Sin rol regional (se puede añadir después como filtro de tiendas).</td></tr>
+          <tr><td class="k">Activación de módulos</td><td>Panel de admin en el hub con matriz tienda × módulo; escribe en el maestro</td><td>El hub solo pinta los módulos activos de la tienda. Un módulo desactivado también rechaza peticiones en el backend.</td></tr>
+          <tr><td class="k">Módulos</td><td>Los 6 actuales, todos activables a voluntad: Checklist, Xfer Reg, Garantías, Ajustes, Procurement, Entrenamientos</td><td>Se migran uno a uno, de menor a mayor complejidad, sobre una plantilla común.</td></tr>
+          <tr><td class="k">Tiempo real</td><td>Polling cada 15–30 s con pestaña visible + refresco al volver a la pestaña</td><td>Una única llamada <code>changes</code> por tienda devuelve lo modificado desde la última consulta.</td></tr>
+          <tr><td class="k">Datos de v1</td><td>Herramienta de migración Firestore → Sheets ejecutable <b>en el momento que elijamos</b>, por tienda y módulo</td><td>Vive en el panel admin del hub. Idempotente: se puede repetir sin duplicar.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 2. ARQUITECTURA -->
+  <section id="arquitectura">
+    <h2><span class="n">02</span>Arquitectura</h2>
+    <p class="intro">Tres capas. El navegador nunca toca Drive directamente: todo pasa por el Apps Script, que se ejecuta con la cuenta propietaria y decide qué puede ver cada usuario.</p>
+
+    <div class="arch">
+      <div class="layer">
+        <div class="lbl">Navegador<small>GitHub Pages · hexabor.github.io/CapiTool/</small></div>
+        <div class="boxes">
+          <div class="box hub"><b>/hub</b><span>login · selección de tienda · menú de módulos · panel admin · migración</span></div>
+          <div class="box core"><b>/core</b><span>core.js (global CT) + core.css · auth, API, cache, polling, UI común</span></div>
+          <div class="box"><b>/modules/checklist</b><span>módulo</span></div>
+          <div class="box"><b>/modules/xfer</b><span>módulo</span></div>
+          <div class="box"><b>/modules/garantias</b><span>módulo</span></div>
+          <div class="box"><b>… ajustes, procurement, entrenamientos</b><span>una carpeta por módulo, mismo repo</span></div>
+        </div>
+      </div>
+      <div class="link">
+        <div class="lbl"></div>
+        <div class="txt">fetch POST text/plain → { token: idToken de Google, action, payload } · sin cabeceras custom (evita preflight CORS) · sigue el redirect 302 de Apps Script</div>
+      </div>
+      <div class="layer">
+        <div class="lbl">Backend<small>Apps Script web app</small></div>
+        <div class="boxes">
+          <div class="box"><b>Router</b><span>doPost → action → handler</span></div>
+          <div class="box"><b>Auth</b><span>verifica idToken (tokeninfo) · resuelve email → tienda + rol</span></div>
+          <div class="box"><b>Config</b><span>tiendas · módulos activos · usuarios</span></div>
+          <div class="box"><b>Data</b><span>list · changes · upsert · delete · archive</span></div>
+          <div class="box"><b>Admin</b><span>activar módulo · aprobar usuario · crear tienda · roles</span></div>
+          <div class="box"><b>LockService</b><span>escrituras serializadas por tienda</span></div>
+        </div>
+      </div>
+      <div class="link">
+        <div class="lbl"></div>
+        <div class="txt">SpreadsheetApp · ejecuta como propietario · acceso "cualquiera" · cache de config en CacheService (60 s)</div>
+      </div>
+      <div class="layer">
+        <div class="lbl">Datos<small>Drive de la cuenta propietaria</small></div>
+        <div class="boxes">
+          <div class="box hub"><b>CapiTool · Maestro</b><span>tiendas · usuarios · modulos · activacion · log</span></div>
+          <div class="box"><b>tiendas/Madrid Atocha</b><span>checklist · xfer_reg · garantias · …</span></div>
+          <div class="box"><b>tiendas/Madrid Islazul</b><span>una pestaña por módulo + archivo</span></div>
+          <div class="box"><b>tiendas/…</b><span>se crea al activar la tienda</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note"><b>Por qué "ejecutar como propietario".</b> Es lo que hace viable tu modelo de permisos: las tiendas no necesitan acceso de Drive a nada. Solo se identifican con Google; el script comprueba en el maestro a qué tienda pertenece ese email y sirve únicamente el Sheet de esa tienda. El admin salta la restricción porque su email tiene rol <code>admin</code>. Si además quieres que una tienda pueda abrir su Sheet en Drive para consultarlo, el script puede compartírselo en solo lectura al aprobar la cuenta.</div>
+  </section>
+
+  <!-- 3. MODELO DE DATOS -->
+  <section id="datos">
+    <h2><span class="n">03</span>Modelo de datos</h2>
+    <p class="intro">Dos tipos de archivo. La fila 1 de cada pestaña es la cabecera y actúa como esquema: el backend convierte filas en objetos por nombre de columna, así que cada módulo define sus columnas sin tocar el script.</p>
+
+    <h3>Sheet maestro: <code>CapiTool · Maestro</code></h3>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Pestaña</th><th>Columnas</th><th>Notas</th></tr></thead>
+        <tbody>
+          <tr><td class="k">tiendas</td><td><code>id</code> <code>nombre</code> <code>activa</code> <code>sheetId</code> <code>creadaEn</code> <code>creadaPor</code></td><td>Precargada con las 69 tiendas de <code>ALL_STORES</code> (activa = no). Al activar una, el script crea su Sheet y guarda el <code>sheetId</code>.</td></tr>
+          <tr><td class="k">usuarios</td><td><code>email</code> <code>tienda</code> <code>rol</code> <code>estado</code> <code>aprobadoPor</code> <code>fecha</code> <code>ultimoAcceso</code></td><td><code>rol</code>: tienda | admin. <code>estado</code>: pendiente | activo | bloqueado. La primera cuenta de cada tienda la aprueba un admin; después, cualquier miembro activo de la tienda puede aprobar.</td></tr>
+          <tr><td class="k">modulos</td><td><code>id</code> <code>nombre</code> <code>descripcion</code> <code>url</code> <code>icono</code> <code>orden</code> <code>activoGlobal</code></td><td>Catálogo. La <code>url</code> es la del repo en Pages. <code>activoGlobal</code> = interruptor general (p. ej. para un módulo en desarrollo).</td></tr>
+          <tr><td class="k">activacion</td><td><code>tienda</code> <code>modulo</code> <code>activo</code> <code>modificadoPor</code> <code>fecha</code></td><td>Una fila por par tienda-módulo. Es la matriz del panel admin. Se cachea 60 s en el backend.</td></tr>
+          <tr><td class="k">log</td><td><code>fecha</code> <code>email</code> <code>accion</code> <code>detalle</code></td><td>Auditoría de acciones de admin y de migraciones. Solo append.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Sheet de tienda: <code>tiendas/&lt;nombre&gt;</code></h3>
+    <p class="small muted">Una pestaña por módulo, más la de archivo si el módulo la necesita. Todas comparten cinco columnas de control al principio; el resto las define cada módulo.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Pestaña</th><th>Columnas de control</th><th>Columnas del módulo (ejemplo)</th></tr></thead>
+        <tbody>
+          <tr><td class="k">_meta</td><td colspan="2"><code>clave</code> <code>valor</code>: versión del esquema por módulo, fecha de la última migración, cycleDate de Xfer Reg…</td></tr>
+          <tr><td class="k">checklist</td><td rowspan="6"><code>id</code> <code>updatedAt</code> <code>updatedBy</code> <code>deleted</code> <code>v</code></td><td><code>lista</code> <code>tarea</code> <code>hecho</code> <code>hechoPor</code> <code>hora</code> <code>orden</code></td></tr>
+          <tr><td class="k">xfer_reg</td><td><code>ref</code> <code>origen</code> <code>destino</code> <code>estado</code> <code>fechaEnvio</code> <code>fechaRecepcion</code> <code>notas</code> …</td></tr>
+          <tr><td class="k">xfer_reg_archivo</td><td>mismas columnas + <code>archivadoEn</code> (equivale a la subcolección <code>archives</code> de v1)</td></tr>
+          <tr><td class="k">garantias</td><td><code>ticket</code> <code>producto</code> <code>estado</code> <code>fechaPedido</code> <code>atencionEspecial</code> <code>llamadas</code> (JSON) …</td></tr>
+          <tr><td class="k">ajustes</td><td><code>hash</code> <code>sku</code> <code>cantidad</code> <code>coste</code> <code>fecha</code> <code>motivo</code> …</td></tr>
+          <tr><td class="k">procurement · entrenamientos</td><td>según el módulo; equipo compartido de Checklist en pestaña <code>equipo</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:16px">Reglas del modelo</h4>
+    <ul class="small">
+      <li><b>Borrado lógico</b>: <code>deleted = 1</code> en vez de eliminar la fila. Así el polling de cambios puede propagar borrados y nunca se pierde nada por accidente. Una limpieza mensual (trigger del script) purga las filas borradas de más de 90 días.</li>
+      <li><b><code>updatedAt</code></b> lo escribe siempre el backend (hora del servidor). Es lo que usa <code>changes?since=</code> y la detección de conflictos.</li>
+      <li><b><code>v</code></b>: contador de versión de la fila. Un <code>upsert</code> que llega con una <code>v</code> antigua se rechaza (409) y el cliente recarga esa fila. Evita que dos dispositivos se pisen.</li>
+      <li><b>Campos anidados</b> (llamadas de garantía, historial de estados de procurement) van como JSON en una columna. Se leen bien en la app y siguen siendo inspeccionables en el Sheet.</li>
+      <li><b>Sin fórmulas</b> en las pestañas de datos: todo lo calcula la app. Las fórmulas en Sheets rompen el mapeo por cabecera y ralentizan las escrituras.</li>
+    </ul>
+  </section>
+
+  <!-- 4. API -->
+  <section id="api">
+    <h2><span class="n">04</span>API del backend (Apps Script)</h2>
+    <p class="intro">Una sola web app. Todas las llamadas son <code>POST</code> con cuerpo JSON <code>{ token, action, ...payload }</code>. La respuesta siempre es <code>{ ok, data | error, serverTime }</code>. La carpeta <code>/backend</code> guarda el código del script y se sube con <code>clasp push</code>.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Action</th><th>Quién</th><th>Entrada</th><th>Devuelve</th></tr></thead>
+        <tbody>
+          <tr><td class="k">auth.me</td><td>cualquiera con token</td><td>—</td><td>email, tienda, rol, estado. Si el email no existe, lo crea como <code>pendiente</code> sin tienda. Actualiza <code>ultimoAcceso</code>.</td></tr>
+          <tr><td class="k">auth.pickStore</td><td>usuario nuevo</td><td>tienda</td><td>Asigna la tienda y deja el estado en <code>pendiente</code>. Solo se puede hacer una vez.</td></tr>
+          <tr><td class="k">config.get</td><td>activo</td><td>—</td><td>Módulos activos de mi tienda (con url, icono, orden). Para admin: catálogo completo.</td></tr>
+          <tr><td class="k">data.list</td><td>activo, módulo activo</td><td>modulo</td><td>Todas las filas no borradas de la pestaña. Se usa al abrir el módulo.</td></tr>
+          <tr><td class="k">data.changes</td><td>activo</td><td>modulo, since</td><td>Filas con <code>updatedAt &gt; since</code>, borradas incluidas. Es la llamada del polling.</td></tr>
+          <tr><td class="k">data.upsert</td><td>activo</td><td>modulo, rows[] (con id y v)</td><td>Inserta o actualiza por <code>id</code>. Responde con las filas resultantes (nueva <code>v</code>, <code>updatedAt</code>) o 409 por fila en conflicto. Acepta lotes.</td></tr>
+          <tr><td class="k">data.delete</td><td>activo</td><td>modulo, ids[]</td><td>Borrado lógico.</td></tr>
+          <tr><td class="k">data.archive</td><td>activo</td><td>modulo, ids[], archiveId</td><td>Mueve filas a <code>&lt;modulo&gt;_archivo</code>. Sustituye a los <code>archives</code> de v1.</td></tr>
+          <tr><td class="k">meta.get / meta.set</td><td>activo</td><td>modulo, clave[, valor]</td><td>Pestaña <code>_meta</code>: cycleDate, preferencias de módulo, etc.</td></tr>
+          <tr><td class="k">team.approve</td><td>activo de la misma tienda o admin</td><td>email</td><td>Pasa a <code>activo</code> a un pendiente de mi tienda.</td></tr>
+          <tr><td class="k">admin.stores</td><td>admin</td><td>—</td><td>Lista de tiendas con estado, usuarios y módulos activos.</td></tr>
+          <tr><td class="k">admin.activateStore</td><td>admin</td><td>tienda</td><td>Marca activa, crea el Sheet de tienda con todas las pestañas y guarda <code>sheetId</code>.</td></tr>
+          <tr><td class="k">admin.setModule</td><td>admin</td><td>tienda, modulo, activo</td><td>Escribe en <code>activacion</code> e invalida la cache.</td></tr>
+          <tr><td class="k">admin.setRole</td><td>admin</td><td>email, rol | estado</td><td>Promover a admin, bloquear, reasignar tienda.</td></tr>
+          <tr><td class="k">migrate.import</td><td>admin</td><td>tienda, modulo, rows[]</td><td>Upsert masivo desde la herramienta de migración; ignora ids ya presentes. Anota en <code>log</code> y <code>_meta</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4 style="margin-top:16px">Detalles de implementación que conviene fijar desde el principio</h4>
+    <ul class="small">
+      <li><b>Verificación del token</b>: <code>UrlFetchApp</code> a <code>oauth2.googleapis.com/tokeninfo?id_token=</code>, comprobando <code>aud</code> (nuestro client ID) y <code>email_verified</code>. Se cachea el resultado por token (CacheService, hasta su <code>exp</code>) para no llamar en cada polling.</li>
+      <li><b>Cada handler comprueba</b>: usuario activo → tienda asignada → módulo activo para esa tienda (o admin). Un módulo desactivado no solo desaparece del menú; el backend rechaza sus peticiones.</li>
+      <li><b>LockService</b> por tienda en toda escritura (<code>LockService.getScriptLock()</code>, espera máx. 10 s). Las lecturas no bloquean.</li>
+      <li><b>Lectura eficiente</b>: <code>getDataRange().getValues()</code> una vez por llamada, nunca celda a celda. Para <code>changes</code>, si la pestaña supera ~5.000 filas, mantener un índice de <code>updatedAt</code> en <code>_meta</code> para cortar antes.</li>
+      <li><b>Respuesta</b> con <code>ContentService.createTextOutput(JSON).setMimeType(JSON)</code>. Apps Script responde con un 302 a <code>script.googleusercontent.com</code>; <code>fetch</code> lo sigue por defecto.</li>
+      <li><b>Despliegue versionado</b>: cada cambio del script se publica como nueva versión de la misma implementación (misma URL). El core guarda la URL en una sola constante.</li>
+    </ul>
+  </section>
+
+  <!-- 5. CORE -->
+  <section id="core">
+    <h2><span class="n">05</span>Core compartido: <code>/core</code></h2>
+    <p class="intro">Lo que hoy está repartido entre <code>app.js</code>, <code>firebase.js</code>, <code>stores.js</code> y el CSS común, en un solo lugar y con una API pequeña y estable. Vive en <code>/core</code> del mismo repo y cada módulo lo carga por ruta relativa. Expone un único global <code>CT</code>.</p>
+    <div class="grid">
+      <div class="card"><h4>CT.auth</h4><ul><li>Carga Google Identity Services, botón "Entrar con Google", renovación silenciosa del token.</li><li>Guarda sesión en <code>localStorage</code> (compartido por todos los módulos por ser el mismo origen).</li><li><code>CT.auth.require()</code>: si no hay sesión, redirige al hub.</li></ul></div>
+      <div class="card"><h4>CT.api</h4><ul><li><code>CT.api.call(action, payload)</code> con reintentos exponenciales y timeout.</li><li>Cola de escrituras pendientes en <code>localStorage</code>: si falla la red, se reintenta al volver. Cierra el hueco de la pérdida de estados de v1 (flush en <code>visibilitychange</code>/<code>pagehide</code>).</li></ul></div>
+      <div class="card"><h4>CT.store</h4><ul><li>Cache en memoria de las filas de un módulo, indexada por <code>id</code>.</li><li>Polling de <code>data.changes</code> cada 20 s con pestaña visible; pausa al ocultarla; refresco inmediato al volver.</li><li>Emite <code>change</code> con las filas afectadas; el módulo solo repinta lo que cambia.</li><li>Escritura optimista: actualiza la cache, pinta, envía; si 409, recarga la fila y avisa.</li></ul></div>
+      <div class="card"><h4>CT.config</h4><ul><li>Módulos activos de mi tienda, tienda actual, rol.</li><li>Cache 60 s; el hub la fuerza al entrar.</li></ul></div>
+      <div class="card"><h4>CT.ui</h4><ul><li>Topbar 48 px con nombre de tienda, volver al hub, ajustes; sidebar 52 px con iconos SVG.</li><li>Toast, modal de confirmación, indicador de sync (sincronizado · pendiente · sin conexión).</li><li>Wrapper de flatpickr (fecha y hora 24 h) para no repetirlo en cada módulo.</li><li>Preferencia "sin mascotas" y utilidades de impresión (B/N, apaisado, compacto).</li></ul></div>
+      <div class="card"><h4>core.css</h4><ul><li>Tokens: azul primario <code>#2563eb</code>, fuente de sistema, cards 10 px, bordes 1 px, hover azul + sombra.</li><li>Layout estrecho primero (monitores verticales), paneles anclados abajo, tablas compactas.</li><li>Hoja de impresión común.</li></ul></div>
+    </div>
+    <div class="note"><b>Contrato.</b> La API pública de <code>CT</code> se trata como estable: un cambio incompatible se hace en el mismo commit en el core y en todos los módulos que lo usan, y la <code>demo.html</code> del core sirve de prueba de humo antes de subir. Los <code>&lt;script src&gt;</code> llevan <code>?v=&lt;fecha&gt;</code> para purgar la cache del navegador cuando haga falta.</div>
+  </section>
+
+  <!-- 6. HUB -->
+  <section id="hub">
+    <h2><span class="n">06</span>Hub: <code>/hub</code></h2>
+    <p class="intro">Es el <code>index.html</code> de la v1 con más responsabilidades: entrada, alta de usuario, menú de módulos según activación y todo lo de administración. Es también la única página que conoce Firestore, para la migración.</p>
+    <div class="grid">
+      <div class="card"><h4>Entrada</h4><p>Pantalla de login con Google. Si la cuenta es nueva, elige tienda (desplegable con las activas) y ve el mensaje "pendiente de aprobación" con quién puede aprobarla. Si está activa, entra al menú.</p></div>
+      <div class="card"><h4>Menú de módulos</h4><p>Cards en grid (3 · 1 · 2 columnas según ancho) solo con los módulos activos para la tienda. Cada card enlaza a la URL del módulo. Marca de agua con el logo. Si no hay ningún módulo activo, mensaje claro.</p></div>
+      <div class="card"><h4>Mi tienda</h4><p>Lista de cuentas de mi tienda con estado; botón "Aprobar" en las pendientes. Preferencias (mascotas, densidad). Cerrar sesión.</p></div>
+      <div class="card"><h4>Panel admin · Tiendas</h4><p>Lista de las 69 tiendas; activar tienda (crea el Sheet), enlace directo al Sheet en Drive, nº de usuarios, último acceso.</p></div>
+      <div class="card"><h4>Panel admin · Módulos</h4><p>Matriz tienda × módulo con toggles. Cambios inmediatos con confirmación en toast. Interruptor global por módulo. Filtro por tienda.</p></div>
+      <div class="card"><h4>Panel admin · Usuarios</h4><p>Todos los usuarios; aprobar, bloquear, cambiar tienda, promover a admin. Registro (<code>log</code>) filtrable.</p></div>
+      <div class="card"><h4>Panel admin · Migración v1</h4><p>Ver sección 08. Por tienda y módulo, con vista previa de cuántas filas se traerán y resultado por fila.</p></div>
+    </div>
+  </section>
+
+  <!-- 7. FASES -->
+  <section id="fases">
+    <h2><span class="n">07</span>Fases y pasos</h2>
+    <p class="intro">Orden con dependencias. Cada fase termina con un criterio de "hecho" comprobable. Las fases 0–3 son la base del proyecto: cuando estén, el resto es repetir el patrón módulo a módulo.</p>
+
+    <div class="phase">
+      <div class="num">0<small>Preparación</small></div>
+      <div>
+        <h3>Cuentas, Drive y repositorios</h3>
+        <p class="goal">Dejar montada la infraestructura que no es código.</p>
+        <ol>
+          <li>Cuenta propietaria: <code>abeatrice@webuy.com</code> (decidido). Comprobar que puede crear proyectos de Google Cloud dentro de la organización <code>webuy.com</code>.</li>
+          <li>En su Drive, crear la carpeta <code>CapiTool/</code> con subcarpeta <code>tiendas/</code>. Crear el Sheet <code>CapiTool · Maestro</code> vacío; <code>backend/setup.gs → setupMaster()</code> crea las 5 pestañas, carga las 69 tiendas y el catálogo de 6 módulos y da de alta el primer admin.</li>
+          <li>En Google Cloud (proyecto de esa cuenta): crear un <b>OAuth Client ID</b> tipo web con origen <code>https://hexabor.github.io</code>. Pantalla de consentimiento en modo <b>interno</b> (todas las cuentas son <code>@webuy.com</code>): sin verificación ni usuarios de prueba.</li>
+          <li>Crear el proyecto Apps Script vinculado al Maestro (Extensiones → Apps Script). Vincular <code>backend/</code> con <code>clasp</code>, subir <code>Code.gs</code> y <code>setup.gs</code>, publicar como web app: ejecutar como yo, acceso cualquiera. Anotar URL e id de implementación.</li>
+          <li>Crear el repo <code>Hexabor/CapiTool</code> con <code>gh repo create</code> desde la carpeta local y activar Pages (rama main, raíz) con <code>gh api</code>.</li>
+          <li>Rellenar <code>docs/config.md</code> con los valores obtenidos. El <code>CLAUDE.md</code> raíz ya está escrito (ver sección 11).</li>
+        </ol>
+        <div class="done"><b>Hecho cuando:</b> abrir la URL del Apps Script devuelve <code>{ ok: true }</code> y <code>hexabor.github.io/CapiTool/</code> sirve la página de espera del hub. Guía paso a paso en <code>docs/ARRANQUE.md</code>.</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">1<small>Backend</small></div>
+      <div>
+        <h3>Apps Script: auth, config y datos</h3>
+        <p class="goal">La API completa de la sección 04 funcionando contra el Maestro y un Sheet de tienda de prueba.</p>
+        <ol>
+          <li>Esqueleto: <code>doPost</code> → parse JSON → verificar token → resolver usuario → despachar por <code>action</code> → respuesta JSON. Manejo de errores uniforme.</li>
+          <li><code>auth.me</code> y <code>auth.pickStore</code> con alta automática de usuarios pendientes.</li>
+          <li><code>admin.activateStore</code>: crea el Sheet de tienda desde una función <code>ensureStoreSheet()</code> que también sirve para añadir pestañas nuevas a tiendas existentes cuando aparezca un módulo.</li>
+          <li>Capa genérica de filas: leer pestaña → objetos por cabecera; escribir con LockService; <code>list</code>, <code>changes</code>, <code>upsert</code> (con control de <code>v</code>), <code>delete</code>, <code>archive</code>, <code>meta</code>.</li>
+          <li><code>config.get</code>, <code>admin.setModule</code>, <code>admin.setRole</code>, <code>team.approve</code>, <code>log</code>.</li>
+          <li>Trigger mensual de purga de borrados antiguos.</li>
+          <li>Pruebas: un archivo <code>tests.gs</code> con funciones que ejecutan cada action con datos de prueba y comprueban el resultado (se lanzan desde el editor). El código vive en <code>/backend</code> y se sube con <code>clasp push</code>.</li>
+        </ol>
+        <div class="done"><b>Hecho cuando:</b> desde la consola del navegador (o Postman) se puede dar de alta un usuario, aprobarlo, activarle un módulo, escribir filas y verlas en el Sheet de tienda; un segundo upsert con <code>v</code> vieja devuelve 409.</div>
+        <p class="deps">Depende de: fase 0.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">2<small>Core</small></div>
+      <div>
+        <h3><code>/core</code>: core.js y core.css</h3>
+        <p class="goal">Que un módulo pueda hacer <code>CT.auth.require()</code>, <code>CT.store.open('checklist')</code> y pintar una tabla sin saber nada de Sheets ni de Google.</p>
+        <ol>
+          <li><code>CT.auth</code> con GIS: botón, callback, token en localStorage, renovación, cierre de sesión.</li>
+          <li><code>CT.api.call</code> + cola de escrituras con reintento y flush en <code>visibilitychange</code>/<code>pagehide</code>.</li>
+          <li><code>CT.store</code>: carga inicial, cache, polling, eventos, escritura optimista y resolución de 409.</li>
+          <li><code>CT.config</code> con cache y <code>CT.ui</code> (topbar, sidebar, toast, modal, sync, flatpickr, impresión).</li>
+          <li><code>core.css</code> con los tokens del estilo KPI Tool 2026 y las reglas de impresión.</li>
+          <li>Página <code>demo.html</code> en el propio repo que ejercita todo (login, lista, alta, edición, borrado, conflicto) y sirve de documentación viva.</li>
+        </ol>
+        <div class="done"><b>Hecho cuando:</b> la demo funciona en dos navegadores a la vez y un cambio en uno aparece en el otro en menos de 30 s.</div>
+        <p class="deps">Depende de: fase 1.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">3<small>Hub</small></div>
+      <div>
+        <h3><code>/hub</code> con panel de admin</h3>
+        <p class="goal">Entrada real para tiendas y para ti. A partir de aquí ya se puede dar acceso a una tienda piloto aunque no haya módulos.</p>
+        <ol>
+          <li>Login, elección de tienda, pantalla de pendiente, menú de módulos activos.</li>
+          <li>"Mi tienda": aprobar compañeros, preferencias, cerrar sesión.</li>
+          <li>Panel admin: tiendas (activar, enlace al Sheet), matriz de módulos, usuarios y roles, log.</li>
+          <li>Hoja de estilo del hub sobre <code>core.css</code>; logo en marca de agua.</li>
+        </ol>
+        <div class="done"><b>Hecho cuando:</b> una cuenta nueva puede darse de alta, tú la apruebas desde el panel, le activas un módulo y ve su card en el menú.</div>
+        <p class="deps">Depende de: fase 2. <b>Aquí termina la base del proyecto.</b></p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">4<small>Plantilla</small></div>
+      <div>
+        <h3>Plantilla de módulo + Checklist</h3>
+        <p class="goal">Fijar el patrón que seguirán los otros cinco módulos, con el más sencillo de los que tienen documento propio.</p>
+        <ol>
+          <li>Carpeta plantilla <code>/modules/_template</code>: <code>index.html</code> con topbar/sidebar del core, <code>module.js</code> con el esqueleto (<code>CT.auth.require()</code>, <code>CT.store.open()</code>, render, handlers), <code>module.css</code>, <code>CLAUDE.md</code>, <code>changelog.js</code>.</li>
+          <li>Crear <code>/modules/checklist</code> desde la plantilla. Definir columnas de <code>checklist</code> y <code>equipo</code>. Migrar la lógica de v1 (listas múltiples, hecho por, hora 24 h, progreso).</li>
+          <li>Registrar el módulo en el catálogo del Maestro y activarlo para la tienda de prueba.</li>
+          <li>Anotar en la plantilla todo lo que hubo que ajustar para que el siguiente módulo salga más rápido.</li>
+        </ol>
+        <div class="done"><b>Hecho cuando:</b> Checklist funciona en dos dispositivos de la tienda de prueba y se ha creado el segundo módulo desde la plantilla en menos de una hora de arranque.</div>
+        <p class="deps">Depende de: fase 3.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">5<small>Módulos</small></div>
+      <div>
+        <h3>Migrar los cinco módulos restantes</h3>
+        <p class="goal">De menor a mayor complejidad, para que los problemas del patrón aparezcan pronto.</p>
+        <ol>
+          <li><b>Entrenamientos</b> (393 líneas en v1): tabla editable, comparte pestaña <code>equipo</code> con Checklist.</li>
+          <li><b>Procurement</b> (713): máquina de estados con <code>statusHistory</code> en JSON; era el que más dependía del tiempo real, buen test del polling.</li>
+          <li><b>Garantías</b> (1.508): estados, log de llamadas, atención especial, doble layout, calendarios.</li>
+          <li><b>Ajustes</b> (814): importación de archivo, hash de deduplicación, modo edición, vista compacta. La deduplicación pasa a hacerse contra la columna <code>hash</code> de la pestaña.</li>
+          <li><b>Xfer Reg</b> (1.984): tabla, análisis, checker, barra de progreso, ciclo diario con <code>cycleDate</code> en <code>_meta</code>, archivo diario con <code>data.archive</code>.</li>
+          <li>Por cada módulo: definir columnas → añadirlas a <code>ensureStoreSheet()</code> → migrar lógica → registrar en catálogo → probar en dos dispositivos → activar para la tienda de prueba.</li>
+        </ol>
+        <div class="done"><b>Hecho cuando:</b> los 6 módulos están en el catálogo y funcionan activados para la tienda de prueba.</div>
+        <p class="deps">Depende de: fase 4. Cada módulo es independiente; el orden es una recomendación.</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">6<small>Migración</small></div>
+      <div>
+        <h3>Herramienta de migración v1 → v2</h3>
+        <p class="goal">Poder traer los datos de Firestore a Sheets, tienda a tienda y módulo a módulo, el día que decidamos mudarnos.</p>
+        <ol>
+          <li>Página <code>migrar.html</code> en el hub (solo admin) que carga el SDK de Firebase de v1 en solo lectura.</li>
+          <li>Un <b>mapeador por módulo</b> (documento Firestore → filas con las columnas de v2), incluidos los <code>archives</code> de Xfer Reg → <code>xfer_reg_archivo</code>.</li>
+          <li>Vista previa: cuántos documentos hay, cuántos se importarían, cuántos ya existen (por <code>id</code>).</li>
+          <li>Ejecución por lotes de 200 filas con <code>migrate.import</code>; resultado por lote; registro en <code>log</code> y marca en <code>_meta.migradoEn</code>.</li>
+          <li>Ensayo completo con la tienda de prueba usando una copia de sus datos de v1.</li>
+        </ol>
+        <div class="done"><b>Hecho cuando:</b> migrar dos veces la misma tienda deja exactamente las mismas filas (idempotencia) y los recuentos por módulo coinciden con v1.</div>
+        <p class="deps">Depende de: fase 5 (necesita las columnas definitivas de cada módulo).</p>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="num">7<small>Corte</small></div>
+      <div>
+        <h3>Piloto y cambio de versión</h3>
+        <p class="goal">Pasar las tiendas piloto a 2.0 sin perder datos ni dejar a nadie sin herramienta.</p>
+        <ol>
+          <li>Activar en el Maestro las 5 tiendas piloto (Atocha, Islazul, Las Rosas, Usera, Talavera) y aprobar su primera cuenta.</li>
+          <li>Anunciar fecha de corte. Ese día: poner v1 en <b>solo lectura</b> (un flag en <code>app.js</code> que bloquea escrituras y muestra aviso), migrar tienda a tienda, verificar recuentos, activar módulos.</li>
+          <li>Banner en v1 con enlace al hub 2.0 durante dos semanas; después, redirección.</li>
+          <li>Una semana de vigilancia: revisar <code>log</code>, conflictos 409 y tiempos de respuesta. Ajustar intervalo de polling si hace falta.</li>
+          <li>Resto de tiendas: se activan bajo demanda desde el panel; no requieren migración porque nunca usaron v1.</li>
+        </ol>
+        <div class="done"><b>Hecho cuando:</b> las 5 tiendas piloto trabajan solo en 2.0 y v1 no recibe escrituras.</div>
+        <p class="deps">Depende de: fase 6.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. MIGRACION -->
+  <section id="migracion">
+    <h2><span class="n">08</span>Migración de datos v1 → v2</h2>
+    <p class="intro">Correspondencia entre la estructura actual de Firestore y el nuevo modelo. Sirve de guía para escribir los mapeadores de la fase 6.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>v1 (Firestore)</th><th>v2 (Sheets)</th><th>Notas</th></tr></thead>
+        <tbody>
+          <tr><td><code>stores/{tienda}</code> · password, lastAccess</td><td>Maestro › <code>tiendas</code> + <code>usuarios</code></td><td>La contraseña desaparece. <code>lastAccess</code> pasa a <code>ultimoAcceso</code> por usuario.</td></tr>
+          <tr><td><code>stores/{tienda}/modules/{modulo}</code> (un doc con arrays dentro)</td><td>Sheet de tienda › pestaña <code>{modulo}</code>, una fila por elemento</td><td>Cada elemento del array recibe un <code>id</code> estable: el que ya tenga en v1 o un hash de sus campos clave, para que la migración sea repetible.</td></tr>
+          <tr><td><code>…/modules/xfer_reg/archives/{id}</code></td><td>pestaña <code>xfer_reg_archivo</code> con <code>archivadoEn</code></td><td>Se conserva el id de archivo como columna <code>archiveId</code>.</td></tr>
+          <tr><td>Timestamps de Firestore</td><td>ISO 8601 en texto</td><td>Evita que Sheets reinterprete fechas según la configuración regional.</td></tr>
+          <tr><td>Objetos anidados (llamadas, statusHistory)</td><td>JSON en una columna</td><td>Sin cambios de forma.</td></tr>
+          <tr><td>Panel admin de v1 (69 tiendas, contraseñas)</td><td>Panel admin del hub</td><td>Se reescribe; no se migra nada de él.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note warn"><b>Ajustes y duplicados.</b> En v1 la fuente recalcula <code>adjCostVal</code> entre exportaciones y se cuelan casi-duplicados. Al migrar, calcular el <code>hash</code> de v2 sin ese campo y quedarnos con la última versión de cada hash. Es el momento de hacer la limpieza que hoy se hace a mano.</div>
+  </section>
+
+  <!-- 9. RIESGOS -->
+  <section id="riesgos">
+    <h2><span class="n">09</span>Riesgos y mitigaciones</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Riesgo</th><th>Impacto</th><th>Mitigación</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Latencia de Apps Script <span class="pill warn">probable</span></td><td>0,3–1,5 s por llamada; arranques en frío de 2–3 s. La app parecería lenta.</td><td>UI optimista, cache local, una sola llamada de arranque por módulo, polling agrupado. Nunca esperar al servidor para pintar.</td></tr>
+          <tr><td class="k">Cuotas de Apps Script <span class="pill warn">a vigilar</span></td><td>Máx. 30 ejecuciones simultáneas por script; 6 min por ejecución. Con 5 tiendas × 2–3 dispositivos y polling de 20 s son ~50.000 llamadas/día.</td><td>Polling solo con pestaña visible, backoff a 60 s tras 5 min sin cambios, cache de token y de config. Si crece la red, subir el intervalo o dividir en varios scripts por región.</td></tr>
+          <tr><td class="k">Concurrencia <span class="pill blue">controlado</span></td><td>Dos dispositivos editando la misma fila.</td><td><code>v</code> por fila + LockService. El que llega tarde recibe 409 y recarga.</td></tr>
+          <tr><td class="k">Seguridad de la URL pública <span class="pill blue">controlado</span></td><td>El script es accesible por cualquiera que tenga la URL.</td><td>Cada petición exige un idToken válido para nuestro client ID; sin token no se lee ni escribe nada. Los Sheets nunca se comparten públicamente.</td></tr>
+          <tr><td class="k">Políticas de Workspace <span class="pill crit">a comprobar en fase 0</span></td><td>El admin de <code>webuy.com</code> puede bloquear: crear proyectos de Cloud, la API de Apps Script (clasp) o publicar web apps con acceso "cualquiera". Lo último cambiaría el diseño de auth.</td><td>Comprobar los tres en los primeros pasos de <code>ARRANQUE.md</code>. Planes B en su tabla final; el de "cualquiera" hay que hablarlo antes de seguir.</td></tr>
+          <tr><td class="k">Datos en cuenta corporativa <span class="pill grey">asumido</span></td><td>Si la cuenta propietaria se desactiva (baja, cambio de puesto), el Drive y el script dejan de estar accesibles.</td><td>Añadir un segundo admin de Workspace como editor del script y de la carpeta <code>CapiTool/</code>; documentar el traspaso en <code>docs/config.md</code>.</td></tr>
+          <tr><td class="k">Cambio en core rompe módulos <span class="pill blue">controlado</span></td><td>Todos los módulos cargan el mismo archivo.</td><td>Mismo repo: el cambio en core y la adaptación de los módulos van en el mismo commit; <code>demo.html</code> del core como prueba de humo antes de subir.</td></tr>
+          <tr><td class="k">Límites de Sheets <span class="pill grey">lejano</span></td><td>10 M de celdas por archivo; lentitud a partir de ~50.000 filas por pestaña.</td><td>Un Sheet por tienda lo hace irrelevante a corto plazo. Archivo anual por pestaña si alguna tienda se acerca.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 10. PENDIENTES -->
+  <section id="pendientes">
+    <h2><span class="n">10</span>Pendientes de decidir</h2>
+    <p class="intro">Resueltos el 17/09: cuenta propietaria (<code>abeatrice@webuy.com</code>), cuentas de tienda (todas <code>@webuy.com</code>) y estructura de repos (monorepo). Quedan estos; ninguno bloquea el backend, pero deben cerrarse antes de la fase 3.</p>
+    <ul class="chk">
+                  <li><span>¿Quién es el segundo admin de Workspace con acceso al script y a la carpeta de Drive (respaldo de la cuenta propietaria)?</span></li>
+      <li><span>Intervalo de polling inicial. <span class="sub">Propuesta: 20 s visible, 60 s tras 5 min sin cambios.</span></span></li>
+      <li><span>¿Las tiendas reciben acceso de solo lectura a su Sheet en Drive? <span class="sub">Útil para exportar; es una línea en el backend.</span></span></li>
+      <li><span>¿"Abandoned 45 días" entra en el catálogo como módulo futuro o se descarta?</span></li>
+      <li><span>¿Qué se hace con v1 tras el corte: redirección permanente o archivo del repo?</span></li>
+    </ul>
+  </section>
+
+  <!-- 11. ARRANQUE -->
+  <section id="arranque">
+    <h2><span class="n">11</span>Arranque del nuevo proyecto</h2>
+    <p class="intro">Qué llevarse al nuevo repositorio (y a la nueva sesión de trabajo) para no partir de una hoja en blanco.</p>
+    <h3>Qué se copia de v1</h3>
+    <ul class="small">
+      <li><code>ALL_STORES</code> (69 tiendas) → pestaña <code>tiendas</code> del Maestro y constante en core.</li>
+      <li>Las reglas de negocio de cada módulo (estados de garantías, ciclo diario de Xfer Reg, hash de ajustes, equipo de Checklist), leyéndolas del código de v1 cuando toque cada módulo.</li>
+      <li>El estilo: tokens, topbar 48 px, sidebar 52 px, iconos SVG, tarjetas 10 px, reglas de impresión.</li>
+      <li><code>changelog.js</code> como convención (una versión por día, v0.x).</li>
+      <li>La configuración de Firebase de v1, solo para la herramienta de migración.</li>
+    </ul>
+    <h3>Qué no se copia</h3>
+    <ul class="small">
+      <li>Nada de <code>firebase.js</code> ni de la lógica de login por contraseña.</li>
+      <li>El acoplamiento actual módulo ↔ index (activación por clases <code>disabled</code> en el HTML): en 2.0 lo decide el Maestro.</li>
+    </ul>
+    <h3>Qué hay ya en <code>D:\1. Proyectos\CapiTool2</code></h3>
+    <pre>CLAUDE.md            decisiones, estructura, convenciones (lo lee el chat al abrir)
+docs/ARRANQUE.md     fase 0 paso a paso: repo, Pages, Cloud/OAuth, Drive, clasp, web app
+docs/config.md       valores de entorno (placeholders hasta completar la fase 0)
+docs/api.md          acciones del backend y contrato de transporte
+docs/schema.md       pestañas y columnas del maestro y de los Sheets de tienda
+docs/plan.html       este plan
+backend/             appsscript.json, Code.gs (ping + router vacío), setup.gs (setupMaster)
+core/stores.js       las 69 tiendas (ALL_STORES)
+hub/index.html       página de espera
+modules/             carpetas vacías por módulo + README con el mapeo v1 → v2
+v1-reference/        copia de OmniTool v1 sin .git (ignorada por git)
+assets/              logo y favicon</pre>
+    <h3>Primera sesión en el nuevo proyecto</h3>
+    <ul class="chk">
+      <li><span>Abrir Claude Code en <code>D:\1. Proyectos\CapiTool2</code> y pedir: "sigue <code>docs/ARRANQUE.md</code>".</span></li>
+      <li><span>Fase 0 completa (repo con Pages, Cloud/OAuth, Drive, Maestro inicializado, Apps Script publicado).</span></li>
+      <li><span>Guardar en la memoria del nuevo proyecto: decisiones de la sección 01, URL del Apps Script, client ID, ids de los Sheets.</span></li>
+      <li><span>Empezar por la fase 1 (backend) con <code>tests.gs</code> desde el primer día.</span></li>
+    </ul>
+  </section>
+
+  <footer>CapiTool 2.0 · plan de proyecto · 17 de septiembre de 2026 · se revisa al cerrar cada fase.</footer>
+</div>
