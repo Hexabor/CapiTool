@@ -11,3 +11,10 @@ Publicación: https://hexabor.github.io/CapiTool/
 
 Documentación de trabajo en `docs/` (empezar por `docs/ARRANQUE.md`). Sucesor de
 [OmniTool](https://github.com/Hexabor/OmniTool) (v1).
+
+## Árbol de fases
+
+[Árbol de fases de CapiTool 2.0](https://hexabor.github.io/CapiTool/docs/mapa-fases.html),
+accesible desde el hub. Fuente `docs/mapa-fases.html`; mantenimiento, evidencias y límites
+en [docs/ARBOL-DE-FASES.md](docs/ARBOL-DE-FASES.md). Actualizarlo en cada avance relevante
+conservando ruta, formato y audiencia. Publicar el árbol no acepta las fases del proyecto.
