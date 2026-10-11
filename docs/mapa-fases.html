@@ -1,0 +1,677 @@
+﻿<title>Fases CapiTool 2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Barlow:wght@400;500;600&family=Share+Tech+Mono&display=swap">
+<style>
+/* Layout: árbol tecnológico de juego. Carriles horizontales por rama, niveles en columnas, enlaces en ángulo recto.
+   Los encargos externos son «recursos» arriba; las mejoras que los necesitan llevan su insignia. Primero noche; modo día con el botón o el tema del sistema. */
+:root{
+  color-scheme:dark;
+  --bg:#0b111b; --grid:#14202f; --panel:#111a28; --panel2:#162234; --ink:#e7eef8; --muted:#8a9bb2; --line:#26364c;
+  --r1:#38c2ff; --r2:#a98bff; --r3:#ffb547; --r4:#4fe39a; --r5:#ff8fd8; --r6:#d7e36a; --res:#ff7a8a;
+  --done:#ffd34d; --avail:#6cf2ff; --lock:#3a4a60; --lock-ink:#c3cfdf; --on-c:#06121f; --on-done:#2a2000; --on-res:#2b0007; --glow:.45;
+  --font-display:"Rajdhani","Segoe UI",system-ui,sans-serif; --font-body:"Barlow","Segoe UI",system-ui,sans-serif; --font-mono:"Share Tech Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]):not([data-theme="esmeralda"]){
+  color-scheme:light;
+  --bg:#eef2f7; --grid:#dfe6ef; --panel:#ffffff; --panel2:#f5f8fc; --ink:#14202f; --muted:#56677e; --line:#c6d1df;
+  --r1:#0b7fb5; --r2:#6448d4; --r3:#b66d00; --r4:#138a4b; --r5:#b0307f; --r6:#6b7a00; --res:#cf3550;
+  --done:#e6b000; --avail:#0a8fb3; --lock:#d4dce7; --lock-ink:#3c4a5d; --on-c:#ffffff; --on-done:#2a2000; --on-res:#ffffff; --glow:.3}}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg:#eef2f7; --grid:#dfe6ef; --panel:#ffffff; --panel2:#f5f8fc; --ink:#14202f; --muted:#56677e; --line:#c6d1df;
+  --r1:#0b7fb5; --r2:#6448d4; --r3:#b66d00; --r4:#138a4b; --r5:#b0307f; --r6:#6b7a00; --res:#cf3550;
+  --done:#e6b000; --avail:#0a8fb3; --lock:#d4dce7; --lock-ink:#3c4a5d; --on-c:#ffffff; --on-done:#2a2000; --on-res:#ffffff; --glow:.3}
+/* Esmeralda: tono intermedio, metálico, algo más claro que el esmeralda puro */
+:root[data-theme="esmeralda"]{
+  color-scheme:dark;
+  --bg:#3b7f69; --grid:#46907a; --panel:#2c6352; --panel2:#367462; --ink:#f1fbf6; --muted:#c3e2d6; --line:#5fa38d;
+  --r1:#8fdcff; --r2:#d6c9ff; --r3:#ffd27a; --r4:#dcff8f; --r5:#ffc2ec; --r6:#f0f5a8; --res:#ffa3b1;
+  --done:#ffe066; --avail:#aef7ff; --lock:#285346; --lock-ink:#d6ece3; --on-c:#0d2a22; --on-done:#2a2000; --on-res:#3a0010; --glow:.4}
+:root[data-theme="esmeralda"] body{background-image:linear-gradient(125deg,rgba(255,255,255,.13) 0%,rgba(255,255,255,0) 28%,rgba(255,255,255,.07) 52%,rgba(255,255,255,0) 74%,rgba(0,0,0,.08) 100%),linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:100% 100%,32px 32px,32px 32px;background-attachment:fixed,scroll,scroll}
+.temas{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel2)}
+.tema{all:unset;cursor:pointer;font:700 12.5px var(--font-display);letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.tema+.tema{border-left:1px solid var(--line)}
+.tema[aria-pressed="true"]{background:var(--avail);color:var(--on-c)}
+.tema:hover{color:var(--ink)}
+.tema:focus-visible{outline:2px solid var(--avail);outline-offset:-2px}
+.cab-der{display:flex;flex-wrap:wrap-reverse;align-items:center;justify-content:flex-end;gap:8px 16px;flex:1 1 520px;min-width:0;max-width:100%}
+.cab-der .leyenda{justify-content:flex-end}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--font-body);padding-inline:16px;padding-block:12px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
+html,body{height:100%}
+/* El usuario lo prefiere como el 75 % del navegador (11/10/2026): toda la página a esa escala. */
+html{zoom:.75}
+.wrap{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:12px}
+.cuerpo{display:grid;grid-template-columns:280px minmax(0,1fr);gap:12px;min-height:0}
+.cuerpo.sin-lateral{grid-template-columns:minmax(0,1fr)}
+.cuerpo.sin-lateral .lateral{display:none}
+.herr .der{display:flex;gap:8px}
+.lateral{display:flex;flex-direction:column;gap:10px;overflow-y:auto;min-height:0;padding-right:2px}
+.principal{display:flex;flex-direction:column;gap:6px;min-height:0;min-width:0}
+.herr{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+@media (max-width:900px){html,body{height:auto}.wrap{height:auto}.cuerpo{grid-template-columns:minmax(0,1fr)}.lateral{overflow:visible}}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 24px}
+header h1{flex:0 1 auto;min-width:0}
+h1{font:700 clamp(22px,2.6vw,30px)/1 var(--font-display);letter-spacing:.06em;text-transform:uppercase;margin:0}
+h1 small{display:block;font:500 12.5px/1.3 var(--font-body);letter-spacing:0;text-transform:none;color:var(--muted);margin-top:4px}
+.leyenda{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.leyenda span{display:inline-flex;align-items:center;gap:6px}
+.k{width:16px;height:16px;border-radius:4px;display:inline-grid;place-items:center;font:700 10px var(--font-display)}
+.k.done{background:var(--done);color:var(--on-done)}.k.avail{border:2px solid var(--avail);box-shadow:0 0 8px var(--avail)}.k.lock{background:var(--lock)}.k.mine{border:2px dashed var(--done)}
+
+.caja{background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.caja h2{font:700 13px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.recursos{display:flex;flex-wrap:wrap;gap:8px}
+.ya{display:flex;flex-direction:column;gap:6px}
+.ya .chip{display:grid;grid-template-columns:10px minmax(0,1fr);gap:9px;border-radius:8px;padding:7px 10px;align-items:start}
+.ya .chip i{margin-top:6px}
+.ya .chip span{display:grid;gap:1px;min-width:0}
+.ya .chip b{font:700 14px/1.2 var(--font-display);letter-spacing:.02em}
+.ya .chip small{font-size:12px;line-height:1.3}
+.rec{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;border:1px solid color-mix(in srgb,var(--res) 55%,transparent);background:color-mix(in srgb,var(--res) 10%,transparent);font:600 13px var(--font-body)}
+.rec .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--res);color:var(--on-res);font:700 11px var(--font-display)}
+.rec small{color:var(--muted);font-weight:500}
+.rec.ok{border-color:var(--done);background:color-mix(in srgb,var(--done) 12%,transparent)}.rec.ok .ic{background:var(--done);color:var(--on-done)}
+.rec:focus-visible{outline:2px solid var(--avail);outline-offset:2px}
+.chip{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;border:1px solid var(--avail);color:var(--ink);font:600 13px var(--font-body);box-shadow:0 0 10px color-mix(in srgb,var(--avail) 25%,transparent)}
+.chip i{width:8px;height:8px;border-radius:50%}
+.chip small{color:var(--muted);font-weight:500}
+.chip:focus-visible{outline:2px solid var(--avail);outline-offset:2px}
+.vacio{color:var(--muted)}
+.arbol-scroll{flex:1;min-height:0;overflow:auto;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--bg) 85%,transparent)}
+.lienzo{position:relative}
+.arbol{position:absolute;left:0;top:0;transform-origin:0 0}
+.ajuste{all:unset;cursor:pointer;font:700 12px var(--font-display);letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--ink)}
+.ajuste:hover,.ajuste:focus-visible{border-color:var(--avail)}
+.arbol svg{position:absolute;inset:0;overflow:visible}
+.carril{position:absolute;left:0;right:0;border-top:1px solid var(--line)}
+.carril:first-of-type{border-top:0}
+.carril .nombre{position:sticky;left:0;display:inline-flex;flex-direction:column;gap:2px;padding:8px 10px;width:122px;z-index:3;background:linear-gradient(90deg,var(--bg) 70%,transparent)}
+.carril .nombre b{font:700 15px/1 var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.carril .nombre small{font-size:11px;color:var(--muted);line-height:1.3}
+.nivel{position:absolute;top:0;font:700 11px var(--font-mono);color:var(--muted);letter-spacing:.1em}
+.nodo{all:unset;position:absolute;cursor:pointer;z-index:2;display:grid;grid-template-columns:30px 1fr;gap:7px;align-items:center;padding:6px 8px 6px 7px;border-radius:10px;
+  background:linear-gradient(160deg,var(--panel2),var(--panel));border:1.5px solid var(--lock);transition:transform .15s,box-shadow .15s,opacity .15s,border-color .15s}
+.nodo:hover{transform:translateY(-2px)}
+.nodo:focus-visible{outline:2px solid var(--avail);outline-offset:3px}
+.nodo .ico{width:30px;height:30px;display:grid;place-items:center;clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0 50%);background:var(--lock);color:var(--ink);font:700 13px var(--font-display)}
+.nodo .t{font:700 calc(13.5px * var(--fz, 1))/1.1 var(--font-display);letter-spacing:.02em;text-wrap:balance}
+.nodo .s{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;align-items:center}
+.nodo .tipo{font:600 9.5px/1 var(--font-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.tag{font:700 9.5px/1 var(--font-display);letter-spacing:.1em;text-transform:uppercase;padding:3px 5px;border-radius:3px;background:var(--lock);color:var(--muted)}
+.reqs{display:inline-flex;gap:3px}
+.reqs i{width:15px;height:15px;border-radius:50%;display:grid;place-items:center;background:var(--res);color:var(--on-res);font:700 9px/1 var(--font-display);font-style:normal}
+.reqs i.ok{background:var(--done);color:var(--on-done)}
+/* estados */
+.nodo.done{border-color:var(--done);background:linear-gradient(160deg,color-mix(in srgb,var(--done) 18%,var(--panel2)),var(--panel))}
+.nodo.done .ico{background:var(--done);color:var(--on-done)}
+.nodo.done .tag{background:var(--done);color:var(--on-done)}
+.nodo.avail{border-color:var(--avail);box-shadow:0 0 0 1px var(--avail),0 0 18px color-mix(in srgb,var(--avail) 45%,transparent)}
+.nodo.avail .ico{background:var(--c);color:var(--on-c)}
+.nodo.avail .tag{background:var(--avail);color:var(--on-c)}
+.nodo.mine{border-style:dashed;border-color:var(--done)}
+.nodo.mine .tag{background:transparent;color:var(--done);box-shadow:inset 0 0 0 1px var(--done)}
+.nodo.curso{border:1.5px solid var(--avail);background:linear-gradient(160deg,color-mix(in srgb,var(--avail) 48%,var(--panel2)),color-mix(in srgb,var(--avail) 24%,var(--panel)));box-shadow:inset 0 0 0 1.5px var(--avail),0 0 0 2px var(--panel),0 0 0 4px var(--avail)}
+.nodo.curso .t{font-weight:800}
+.nodo.curso .ico{background:var(--avail);color:var(--on-c)}
+.nodo.curso .tag{background:var(--avail);color:var(--on-c)}
+.nodo.pausa{border:1.5px dashed var(--muted);background:repeating-linear-gradient(135deg,var(--panel) 0 9px,color-mix(in srgb,var(--muted) 16%,var(--panel)) 9px 18px)}
+.nodo.pausa .tag{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--muted)}
+.k.curso{background:var(--avail)}.k.pausa{border:1.5px dashed var(--muted);background:repeating-linear-gradient(135deg,transparent 0 3px,color-mix(in srgb,var(--muted) 45%,transparent) 3px 6px)}
+.ya{max-height:56vh;overflow-y:auto;padding-right:4px}@media (max-width:900px){.ya{max-height:none;overflow:visible}}
+.ya .grupo{display:block;font:700 10px/1.2 var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 0 3px}.ya .grupo:first-child{margin-top:0}
+.nodo.lock{opacity:.82}
+.nodo.lock .t{color:var(--lock-ink)}
+.nodo.opc{border-style:dotted}
+@media (prefers-reduced-motion:no-preference){.nodo.avail{animation:latido 2.4s ease-in-out infinite}}
+@keyframes latido{50%{box-shadow:0 0 0 1px var(--avail),0 0 28px color-mix(in srgb,var(--avail) 70%,transparent)}}
+/* foco */
+.arbol.foco .nodo{opacity:.25}
+.arbol.foco .nodo.sel,.arbol.foco .nodo.antes,.arbol.foco .nodo.despues{opacity:1}
+.nodo.sel{transform:translateY(-2px) scale(1.04);box-shadow:0 0 0 2px var(--ink),0 0 24px color-mix(in srgb,var(--ink) 35%,transparent)}
+path.e{fill:none;stroke:var(--line);stroke-width:2.2}
+path.e.hot{stroke:var(--avail);opacity:.85}
+path.e.hecho{stroke:var(--done);opacity:.75}
+path.e.debil{stroke-dasharray:4 6;stroke-width:1.8}
+.arbol.foco path.e{opacity:.08}
+.arbol.foco path.e.antes{opacity:1;stroke:var(--done);stroke-width:3}
+.arbol.foco path.e.despues{opacity:1;stroke:var(--avail);stroke-width:3}
+.ficha{display:grid;gap:10px}.ficha[hidden]{display:none}
+.ficha .cab{display:flex;gap:12px;align-items:center}
+.ficha .cab .ico{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0 50%);font:700 18px var(--font-display);color:var(--on-c)}
+.ficha h3{margin:0;font:700 20px/1.05 var(--font-display);letter-spacing:.03em}
+.ficha .rama{font:700 11px var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.ficha p{margin:0;max-width:78ch}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.grid2 b{display:block;font:700 12px var(--font-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.grid2 .l{display:flex;flex-wrap:wrap;gap:6px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{all:unset;cursor:pointer;font:700 13px var(--font-display);letter-spacing:.08em;text-transform:uppercase;padding:7px 12px;border-radius:6px;border:1px solid var(--line);background:var(--panel2)}
+.btn:hover,.btn:focus-visible{border-color:var(--avail)}
+.nota{font-size:12.5px;color:var(--muted);margin:0}
+/* subapartados: barra de avance en la tarjeta y ventana con el detalle */
+.nodo .prog{position:absolute;left:9px;right:9px;bottom:3px;height:3px;border-radius:2px;overflow:hidden;display:flex;background:var(--lock)}
+.prog i{display:block;height:100%}
+.prog .p-done{background:var(--done)}.prog .p-audit{background:var(--avail)}.prog .p-todo{background:transparent}.prog .p-wait{background:repeating-linear-gradient(90deg,var(--res) 0 3px,transparent 3px 6px)}
+.sub-res{display:grid;gap:6px;justify-items:start}
+.sub-res .prog{position:static;display:flex;width:100%;height:8px;border-radius:4px;overflow:hidden;background:var(--lock)}
+.velo{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--bg) 72%,transparent);backdrop-filter:blur(3px)}
+.velo[hidden]{display:none}
+.ventana{width:min(1040px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.35);display:grid;gap:12px}
+.vcab{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.vcab .rama{font:700 11px var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.ventana h3{margin:2px 0 0;font:700 22px/1.1 var(--font-display);letter-spacing:.03em}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-items:start}
+.col h4{margin:0 0 8px;font:700 12px var(--font-display);letter-spacing:.12em;text-transform:uppercase;display:flex;gap:7px;align-items:center;color:var(--muted)}
+.col h4 i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.subi{border:1.5px solid var(--lock);border-radius:9px;padding:8px 10px;margin-bottom:8px;background:var(--panel2);display:grid;gap:5px}
+.subi b{font:700 14px/1.15 var(--font-display);letter-spacing:.02em}
+.subi p{margin:0;font-size:12.5px;line-height:1.35;color:var(--muted)}
+.subi .s{display:flex;flex-wrap:wrap;gap:5px}
+.subi.done{border-color:var(--done)}.subi.audit{border-color:var(--avail)}.subi.wait{border-style:dashed;border-color:var(--res)}
+.chipi{font:700 9.5px/1 var(--font-display);letter-spacing:.08em;text-transform:uppercase;padding:3px 6px;border-radius:3px;background:var(--lock);color:var(--lock-ink)}
+.chipi.alto{background:var(--res);color:var(--on-res)}.chipi.medio{background:var(--real);color:var(--on-c)}.chipi.g-ok{background:var(--done);color:var(--on-done)}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Árbol de fases · CapiTool 2.0<small>Estado a 12/10/2026 · Arranque parcial; cierre y aceptación pendientes</small></h1>
+    <div class="cab-der"><div class="temas" role="group" aria-label="Tema"><button type="button" class="tema" data-t="light">☀ Día</button><button type="button" class="tema" data-t="esmeralda">◆ Esmeralda</button><button type="button" class="tema" data-t="dark">☾ Noche</button></div><div class="leyenda" aria-label="Leyenda">
+      <span><i class="k done">✓</i>Completada</span>
+      <span><i class="k curso"></i>En curso</span>
+      <span><i class="k pausa"></i>En pausa</span>
+      <span><i class="k avail"></i>Investigable ahora</span>
+      <span><i class="k mine"></i>Te toca</span>
+      <span><i class="k lock"></i>Bloqueada</span>
+      <span><i class="k" style="border:1.5px dotted var(--muted)"></i>Opcional</span>
+    </div></div>
+  </header>
+
+  <div class="cuerpo" id="cuerpo">
+    <aside class="lateral">
+      <section class="caja ficha" id="ficha" hidden aria-live="polite"><p class="vacio">Toca una mejora del árbol para ver su ficha.</p></section>
+      <section class="caja" aria-labelledby="h-ya"><h2 id="h-ya">En curso, en pausa e investigable</h2><div class="ya" id="ya"></div></section>
+      <section class="caja" aria-labelledby="h-rec"><h2 id="h-rec">Recursos externos</h2><div class="recursos" id="recursos"></div></section>
+      <p class="nota"><b>Cómo se lee:</b> cada rama avanza de izquierda a derecha; toca una mejora para ver qué la desbloquea (dorado) y qué abre (azul). Los recursos son encargos que dependen de otras personas.</p>
+      <p class="nota">«Marcar como hecha» y «Conseguido» solo cambian esta página en tu navegador, para ver qué se desbloquearía. No avisan a nadie ni cambian el proyecto.</p>
+    </aside>
+    <main class="principal">
+      <div class="herr"><span id="escala"></span><span class="der"><button type="button" class="ajuste" id="lateral">Ocultar lateral</button><button type="button" class="ajuste" id="ajuste">Tamaño real</button></span></div>
+      <div class="arbol-scroll" id="marco"><div class="lienzo" id="lienzo"><div class="arbol" id="arbol"><svg id="enlaces" aria-hidden="true"></svg></div></div></div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ==================== DATOS DEL PROYECTO (lo único que se edita) ====================
+   RAMAS: carriles horizontales, de arriba abajo. c: color var(--r1)…var(--r6). filas: filas de tarjetas del carril.
+   RECURSOS: encargos que dependen de otras personas (RR. HH., un proveedor, el cliente…). q: quién. ok: true si ya está disponible.
+   FASES: mejoras. r: rama · nv: nivel (columna, de 1 en adelante) · f: fila dentro del carril (0, 1…) · ic: un símbolo o
+     número · t: título corto · e: estado ('done' completada, 'curso' se está trabajando ahora, 'pausa' empezada e interrumpida, 'mine' le toca al usuario, 'todo' pendiente; «investigable ahora»
+     y «bloqueada» se calculan solos) · q: quién la hace · d: descripción en lenguaje llano · dep: obligatorias (ids) ·
+     debil: recomendables · res: recursos que necesita · opc: true si es opcional · k: tipo de trabajo (obra, ensayo,
+     decision, externo, uso, remate; ver TIPOS) · prox: siguiente resultado comprobable (frase corta). */
+const RAMAS = [
+  {
+    "id": "base",
+    "n": "Base del proyecto",
+    "s": "Fases 0–3 · infraestructura, API y hub",
+    "c": "var(--r5)",
+    "filas": 1
+  },
+  {
+    "id": "mods",
+    "n": "Módulos",
+    "s": "Fases 4–5 · patrón común y seis herramientas",
+    "c": "var(--r2)",
+    "filas": 1
+  },
+  {
+    "id": "real",
+    "n": "Migración y uso",
+    "s": "Fases 6–7 · ensayo antes del corte",
+    "c": "var(--r3)",
+    "filas": 1
+  }
+];
+const RECURSOS = [
+  {
+    "id": "oauth",
+    "ic": "G",
+    "t": "Configuración OAuth contrastada",
+    "q": "Arc / responsable de Cloud",
+    "d": "El plan y la guía local describen modalidades diferentes. Confirmar la configuración realmente aplicada y completar la documentación propia; no cambiar permisos por publicar el árbol.",
+    "ok": false
+  },
+  {
+    "id": "decisiones",
+    "ic": "◆",
+    "t": "Decisiones previas al hub",
+    "q": "Arc",
+    "d": "Plan §10: respaldo de administración, acceso de tiendas a Sheets y módulo futuro; decisiones aún por confirmar. No ampliar permisos en esta ronda.",
+    "ok": false
+  },
+  {
+    "id": "corte",
+    "ic": "★",
+    "t": "Fecha y alcance del corte",
+    "q": "Arc y tiendas piloto",
+    "d": "Plan fases 6–7: decidir cuándo migrar y coordinar el uso de la versión 2.0. El árbol no autoriza ni ejecuta la migración.",
+    "ok": false
+  }
+];
+const TIPOS = {
+  obra:     { ic: '⚒', n: 'Construcción', d: 'código nuevo con sus pruebas y auditoría; suele llevar varias rondas' },
+  ensayo:   { ic: '⚗', n: 'Ensayo', d: 'preparar, ejecutar y leer resultados; rápido si sale bien, aunque puede destapar ajustes' },
+  decision: { ic: '◆', n: 'Decisión', d: 'la tomas tú con la propuesta o las cifras delante; suele ser breve' },
+  externo:  { ic: '⇄', n: 'Coordinación', d: 'depende de otras personas o equipos; el ritmo no es solo nuestro' },
+  uso:      { ic: '★', n: 'Uso real', d: 'trabajo de verdad con la app, por ti o por las tiendas' },
+  remate:   { ic: '✎', n: 'Remates', d: 'piezas pequeñas y sueltas que se pueden hacer de una en una' },
+};
+const FASES = [
+  {
+    "id": "f0",
+    "r": "base",
+    "nv": 1,
+    "f": 0,
+    "ic": "0",
+    "t": "Cerrar el arranque",
+    "e": "pausa",
+    "q": "Equipo de CapiTool y Arc",
+    "k": "remate",
+    "d": "Fase 0 empezada: repositorio y Pages sirven el hub de espera; backend vivo responde 0.0.1. Falta conciliar OAuth/configuración y acreditar los criterios de ARRANQUE.md. No consta cierre aceptado.",
+    "prox": "Configuración propia completa y pruebas de arranque documentadas, sin contradicciones.",
+    "dep": [],
+    "res": [
+      "oauth"
+    ]
+  },
+  {
+    "id": "f1",
+    "r": "base",
+    "nv": 2,
+    "f": 0,
+    "ic": "1",
+    "t": "API del backend",
+    "e": "todo",
+    "q": "Equipo de CapiTool",
+    "k": "obra",
+    "d": "Plan fase 1: autenticación, configuración, activación y filas con versión/LockService. El código principal es aún router vacío; no consta implementación de los handlers.",
+    "prox": "Pruebas con datos ficticios acreditan autorización y conflicto 409 según el plan.",
+    "dep": [
+      "f0"
+    ]
+  },
+  {
+    "id": "f2",
+    "r": "base",
+    "nv": 3,
+    "f": 0,
+    "ic": "2",
+    "t": "Core común",
+    "e": "todo",
+    "q": "Equipo de CapiTool",
+    "k": "obra",
+    "d": "Plan fase 2: login, llamadas, cola, caché, polling y UI compartida. El repositorio solo contiene el catálogo de tiendas; core.js/core.css y demo no constan.",
+    "prox": "Demo ficticia funciona en dos navegadores y propaga un cambio en menos de 30 s.",
+    "dep": [
+      "f1"
+    ]
+  },
+  {
+    "id": "f3",
+    "r": "base",
+    "nv": 4,
+    "f": 0,
+    "ic": "3",
+    "t": "Hub y administración",
+    "e": "todo",
+    "q": "Equipo de CapiTool y Arc",
+    "k": "obra",
+    "d": "Plan fase 3: acceso, selección de tienda, módulos activos y panel de administración. La entrada publicada es una página de espera; aún no acredita este hub funcional.",
+    "prox": "Alta de prueba, aprobación y activación muestran el módulo conforme al plan.",
+    "dep": [
+      "f2"
+    ],
+    "res": [
+      "decisiones"
+    ]
+  },
+  {
+    "id": "f4",
+    "r": "mods",
+    "nv": 5,
+    "f": 0,
+    "ic": "4",
+    "t": "Plantilla y Checklist",
+    "e": "todo",
+    "q": "Equipo de CapiTool",
+    "k": "obra",
+    "d": "Plan fase 4: plantilla común de módulo y Checklist con equipo/listas/progreso. No constan estos archivos en el principal.",
+    "prox": "Checklist con datos ficticios funciona en dos dispositivos de prueba y permite arrancar un segundo módulo.",
+    "dep": [
+      "f3"
+    ]
+  },
+  {
+    "id": "f5",
+    "r": "mods",
+    "nv": 6,
+    "f": 0,
+    "ic": "5",
+    "t": "Cinco módulos",
+    "e": "todo",
+    "q": "Equipo de CapiTool",
+    "k": "obra",
+    "d": "Plan fase 5: Entrenamientos, Procurement, Garantías, Ajustes y Xfer Reg. Son independientes tras la plantilla; el orden del plan es recomendable, no una cadena obligatoria.",
+    "prox": "Los seis módulos completos funcionan en el catálogo de prueba, con sus criterios documentados.",
+    "dep": [
+      "f4"
+    ]
+  },
+  {
+    "id": "f6",
+    "r": "real",
+    "nv": 7,
+    "f": 0,
+    "ic": "6",
+    "t": "Ensayar migración",
+    "e": "todo",
+    "q": "Equipo de CapiTool",
+    "k": "ensayo",
+    "d": "Plan fase 6: herramienta solo admin, mapeadores, vista previa y lotes idempotentes. Construir y ensayar con fixtures ficticios; recuperar datos reales queda fuera de esta ronda.",
+    "prox": "Dos importaciones de los mismos fixtures dejan idénticas filas y recuentos por módulo.",
+    "dep": [
+      "f5"
+    ]
+  },
+  {
+    "id": "f7",
+    "r": "real",
+    "nv": 8,
+    "f": 0,
+    "ic": "7",
+    "t": "Piloto y corte",
+    "e": "todo",
+    "q": "Arc y equipo de CapiTool",
+    "k": "uso",
+    "d": "Plan fase 7: transición coordinada, v1 en lectura, verificación por tienda y vigilancia. No se ha iniciado ni queda aceptada por publicar el árbol.",
+    "prox": "Decisión de corte y evidencia de uso 2.0 en las tiendas piloto, con v1 sin escrituras.",
+    "dep": [
+      "f6"
+    ],
+    "res": [
+      "corte"
+    ]
+  }
+];
+/* ==================== FIN DE LOS DATOS ==================== */
+
+// Subapartados de una mejora. e: done (hecho) · audit (hecho, en auditoría) · todo (por hacer) · wait (espera una decisión tuya).
+// imp: cuánto se nota si falta (estimación de Claude). g: probado en el entorno real (ok, parcial, pend; sin g: no aplica).
+const SUB = {
+  "f0": [
+    {
+      "t": "Repositorio y página propia publicados",
+      "e": "done",
+      "imp": "medio",
+      "g": "ok",
+      "d": "GitHub main y clic de la URL propia comprobados el 12/10/2026; página En construcción."
+    },
+    {
+      "t": "Backend esqueleto 0.0.1",
+      "e": "audit",
+      "imp": "alto",
+      "g": "parcial",
+      "d": "Editor corporativo Code.gs/setup.gs y ping técnico comprobados. Esto no acredita API fase 1 ni todo el arranque."
+    },
+    {
+      "t": "OAuth y configuración canónica",
+      "e": "todo",
+      "imp": "alto",
+      "g": "pend",
+      "d": "docs/config principal conserva placeholders; copia local posterior aún incompleta. Conciliar sin promover copia por fecha."
+    },
+    {
+      "t": "Cierre del arranque",
+      "e": "wait",
+      "imp": "alto",
+      "d": "Criterios de ARRANQUE.md y aceptación pendientes; esta ronda no ejecuta setup ni consulta registros de usuarios."
+    }
+  ],
+  "f5": [
+    {
+      "t": "Entrenamientos",
+      "e": "todo",
+      "imp": "medio",
+      "g": "pend",
+      "d": "Plan fase 5: tabla editable y equipo compartido con Checklist."
+    },
+    {
+      "t": "Procurement",
+      "e": "todo",
+      "imp": "medio",
+      "g": "pend",
+      "d": "Plan fase 5: estados e historial; probar propagación mediante polling."
+    },
+    {
+      "t": "Garantías",
+      "e": "todo",
+      "imp": "medio",
+      "g": "pend",
+      "d": "Plan fase 5: estados, llamadas, atención especial, layouts y calendarios."
+    },
+    {
+      "t": "Ajustes",
+      "e": "todo",
+      "imp": "medio",
+      "g": "pend",
+      "d": "Plan fase 5: importación, hash de deduplicación y edición. Sin modificar cálculos durante esta ronda."
+    },
+    {
+      "t": "Xfer Reg",
+      "e": "todo",
+      "imp": "medio",
+      "g": "pend",
+      "d": "Plan fase 5: ciclo diario contra cycleDate, análisis, checker y archivo."
+    }
+  ]
+};
+const EST_SUB = { done: ['Hecho', 'var(--done)'], audit: ['Hecho · en auditoría', 'var(--avail)'], todo: ['Por hacer', 'var(--lock)'], wait: ['Espera tu decisión', 'var(--res)'] };
+const barraSub = items => `<span class="prog" aria-hidden="true">${['done', 'audit', 'wait', 'todo'].map(k => { const c = items.filter(x => x.e === k).length; return c ? `<i class="p-${k}" style="flex:${c}"></i>` : ''; }).join('')}</span>`;
+const resumenSub = items => ['done', 'audit', 'todo', 'wait'].map(k => [k, items.filter(x => x.e === k).length]).filter(([, c]) => c).map(([k, c]) => c + ' ' + EST_SUB[k][0].toLowerCase()).join(' · ');
+const velo = document.createElement('div'); velo.className = 'velo'; velo.hidden = true; document.body.append(velo);
+velo.addEventListener('click', e => { if (e.target === velo) cerrarSub(); });
+function abrirSub(id) {
+  const f = POR[id], items = SUB[id]; if (!items) return;
+  const G = { ok: 'Probado en real', parcial: 'Probado en parte', pend: 'Prueba real pendiente' }, IMP = { alto: 'Se nota mucho si falta', medio: 'Se nota a veces', bajo: 'Se nota poco' };
+  velo.innerHTML = `<div class="ventana" role="dialog" aria-modal="true" aria-labelledby="t-sub">
+    <div class="vcab"><div><span class="rama" style="color:${RAMA[f.r].c}">${RAMA[f.r].n} · subapartados</span><h3 id="t-sub">${f.t}</h3></div><button type="button" class="btn" id="cerrar-sub">Cerrar</button></div>
+    <div class="sub-res">${barraSub(items)}<span class="nota">${resumenSub(items)}. Las etiquetas de impacto son una estimación de Claude: cuánto se notaría en el uso diario si faltara.</span></div>
+    <div class="cols">${['done', 'audit', 'todo', 'wait'].filter(k => items.some(x => x.e === k)).map(k => `<section class="col"><h4><i style="background:${EST_SUB[k][1]}"></i>${EST_SUB[k][0]}</h4>${items.filter(x => x.e === k).map(x => `<div class="subi ${k}"><b>${x.t}</b><p>${x.d}</p><span class="s">${x.imp ? `<span class="chipi ${x.imp}">${IMP[x.imp]}</span>` : ''}${x.g ? `<span class="chipi ${x.g === 'ok' ? 'g-ok' : ''}">${G[x.g]}</span>` : ''}</span></div>`).join('')}</section>`).join('')}</div>
+  </div>`;
+  velo.hidden = false; const c = document.getElementById('cerrar-sub'); c.addEventListener('click', cerrarSub); c.focus();
+}
+function cerrarSub() { velo.hidden = true; velo.innerHTML = ''; document.getElementById('versub')?.focus(); }
+
+const POR = Object.fromEntries(FASES.map(f => [f.id, f])), REC = Object.fromEntries(RECURSOS.map(r => [r.id, r])), RAMA = Object.fromEntries(RAMAS.map(r => [r.id, r]));
+const CLAVE = 'arbol-fases-capitool2:v2';
+let hechas = new Set(), conseguidos = new Set();
+try { const g = JSON.parse(localStorage.getItem(CLAVE) || '{}'); hechas = new Set(g.h || []); conseguidos = new Set(g.r || []); } catch {}
+RECURSOS.forEach(r => { if (r.ok) conseguidos.add(r.id); });   // recursos ya disponibles
+const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify({ h: [...hechas], r: [...conseguidos] })); } catch {} };
+const est = f => (hechas.has(f.id) ? 'done' : f.e);
+const hecha = id => est(POR[id]) === 'done';
+const faltaRec = f => (f.res || []).filter(r => !conseguidos.has(r));
+const lista = f => est(f) !== 'done' && f.dep.every(hecha) && !faltaRec(f).length;
+
+// Geometría
+// Geometría. Con «Ajustar», columnas y filas se reparten el hueco disponible (las tarjetas crecen un poco y se separan);
+// si ni con el tamaño mínimo cabe, se reduce la escala. Con «Tamaño real», tamaño mínimo y desplazamiento.
+const IZQ = 128, CAB = 22, PAD = 6, MIN_COL = 168, MIN_FILA = 76;
+const BX = 18, BY = 15;   // relleno y borde de .nodo (content-box): la caja que se ve mide (W + BX) × (H + BY)
+let COL = MIN_COL, W = 156, H = 72, FILA = MIN_FILA, ALTO = 0, ANCHO = 0;
+const nNiv = Math.max(...FASES.map(f => f.nv)), FILAS = RAMAS.reduce((n, r) => n + r.filas, 0);
+const topCarril = {};
+const pos = f => ({ x: IZQ + (f.nv - 1) * COL + 6, y: topCarril[f.r] + CAB + f.f * FILA + (FILA - H - BY) / 2 });
+
+const arbol = document.getElementById('arbol'), svg = document.getElementById('enlaces');
+const marco = document.getElementById('marco'), lienzo = document.getElementById('lienzo'), btnAjuste = document.getElementById('ajuste'), CLAVE_AJ = 'arbol-fases-capitool2:ajuste';
+let ajustar = true; try { ajustar = localStorage.getItem(CLAVE_AJ) !== 'real'; } catch {}
+
+const carriles = RAMAS.map(r => {
+  const c = document.createElement('div'); c.className = 'carril'; c.style.setProperty('--c', r.c);
+  c.innerHTML = `<span class="nombre"><b>${r.n}</b><small>${r.s}</small></span>`; arbol.append(c); return c;
+});
+const niveles = Array.from({ length: nNiv }, (_, i) => { const n = document.createElement('div'); n.className = 'nivel'; n.style.top = '6px'; n.textContent = 'NIVEL ' + ['I','II','III','IV','V','VI','VII','VIII','IX','X'][i]; arbol.append(n); return n; });
+const nodos = {};
+for (const f of FASES) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'nodo'; b.style.setProperty('--c', RAMA[f.r].c);
+  b.addEventListener('click', () => elegir(f.id)); arbol.append(b); nodos[f.id] = b;
+}
+
+function maquetar() {
+  const aw = marco.clientWidth - 4, ah = marco.clientHeight - 4;
+  COL = ajustar ? Math.max(MIN_COL, Math.floor((aw - IZQ - 12) / nNiv)) : MIN_COL;
+  FILA = ajustar ? Math.max(MIN_FILA, Math.floor((ah - RAMAS.length * (CAB + PAD)) / FILAS)) : MIN_FILA;
+  W = Math.min(236, COL - 42); H = Math.max(62, Math.min(88, FILA - 14));
+  let y = 0; for (const r of RAMAS) { topCarril[r.id] = y; y += CAB + r.filas * FILA + PAD; }
+  ALTO = y; ANCHO = IZQ + nNiv * COL + 12;
+  arbol.style.width = ANCHO + 'px'; arbol.style.height = ALTO + 'px';
+  arbol.style.setProperty('--fz', Math.min(1.22, Math.max(1, W / 156)).toFixed(3));
+  svg.setAttribute('width', ANCHO); svg.setAttribute('height', ALTO); svg.setAttribute('viewBox', `0 0 ${ANCHO} ${ALTO}`);
+  RAMAS.forEach((r, i) => { carriles[i].style.top = topCarril[r.id] + 'px'; carriles[i].style.height = (CAB + r.filas * FILA + PAD) + 'px'; });
+  niveles.forEach((n, i) => { n.style.left = (IZQ + i * COL + 8) + 'px'; });
+  for (const f of FASES) { const b = nodos[f.id], p = pos(f); b.style.left = p.x + 'px'; b.style.top = p.y + 'px'; b.style.width = W + 'px'; b.style.height = H + 'px'; }
+  pintar(); escalar();
+  if (actual) elegir(actual);
+}
+function escalar() {
+  const k = ajustar ? Math.min(1, (marco.clientWidth - 2) / ANCHO, (marco.clientHeight - 2) / ALTO) : 1;
+  arbol.style.transform = k < 1 ? `scale(${k})` : '';
+  lienzo.style.width = Math.floor(ANCHO * k) + 'px'; lienzo.style.height = Math.floor(ALTO * k) + 'px';
+  btnAjuste.textContent = ajustar ? 'Tamaño real' : 'Ajustar a la pantalla';
+  document.getElementById('escala').textContent = ajustar ? (k < 1 ? 'Ajustado al ' + Math.round(k * 100) + ' %' : 'Repartido en todo el espacio') : 'Tamaño real: desplázate para ver el resto';
+}
+// Lateral: se puede ocultar para dar todo el ancho al árbol; se recuerda en este navegador.
+const cuerpo = document.getElementById('cuerpo'), btnLat = document.getElementById('lateral'), CLAVE_LAT = 'arbol-fases-capitool2:lateral';
+const pintarLat = () => { btnLat.textContent = cuerpo.classList.contains('sin-lateral') ? 'Mostrar lateral' : 'Ocultar lateral'; };
+try { if (localStorage.getItem(CLAVE_LAT) === 'oculto') cuerpo.classList.add('sin-lateral'); } catch {}
+pintarLat();
+btnLat.addEventListener('click', () => { cuerpo.classList.toggle('sin-lateral'); try { localStorage.setItem(CLAVE_LAT, cuerpo.classList.contains('sin-lateral') ? 'oculto' : 'visible'); } catch {} pintarLat(); });
+btnAjuste.addEventListener('click', () => { ajustar = !ajustar; try { localStorage.setItem(CLAVE_AJ, ajustar ? 'ajustar' : 'real'); } catch {} maquetar(); });
+let pendiente = 0; new ResizeObserver(() => { cancelAnimationFrame(pendiente); pendiente = requestAnimationFrame(maquetar); }).observe(marco);
+
+// Enlace en ángulo recto: sale por la derecha, baja o sube en el hueco entre columnas y entra por la izquierda.
+// ¿Hay alguna mejora en la misma fila entre las dos columnas? Entonces la línea no puede ir recta por esa fila.
+const ocupa = (r, f, de, a) => FASES.some(g => g.r === r && g.f === f && g.nv > de && g.nv < a);
+function codo(x1, y1, xm, y2, x2) {
+  if (Math.abs(y1 - y2) < 1) return `M${x1},${y1} H${x2}`;
+  const r = Math.min(10, Math.abs(y2 - y1) / 2), s = y2 > y1 ? 1 : -1;
+  return `M${x1},${y1} H${xm - r} Q${xm},${y1} ${xm},${y1 + s * r} V${y2 - s * r} Q${xm},${y2} ${xm + r},${y2} H${x2}`;
+}
+function camino(a, b) {
+  const pa = pos(a), pb = pos(b), x1 = pa.x + W + BX, y1 = pa.y + (H + BY) / 2, x2 = pb.x, y2 = pb.y + (H + BY) / 2, hueco = (COL - W - BX) / 2;   // mitad del espacio entre tarjetas
+  const mismaFila = a.r === b.r && a.f === b.f;
+  // Columna contigua, o misma fila sin nada en medio: codo simple (o recta) en el hueco anterior al destino.
+  if (b.nv - a.nv === 1 || (mismaFila && !ocupa(a.r, a.f, a.nv, b.nv))) return codo(x1, y1, x2 - hueco, y2, x2);
+  // Enlaces largos: bajan o suben en el hueco tras el origen, viajan por el canal libre de la cabecera del carril de destino
+  // (donde no hay mejoras) y entran por el hueco anterior al destino. Así no pasan por detrás de otras mejoras.
+  const xa = x1 + hueco, xb = x2 - hueco, yc = topCarril[b.r] + 12, r = 8;
+  const s1 = yc > y1 ? 1 : -1, s2 = y2 > yc ? 1 : -1;
+  return `M${x1},${y1} H${xa - r} Q${xa},${y1} ${xa},${y1 + s1 * r} V${yc - s1 * r} Q${xa},${yc} ${xa + r},${yc} H${xb - r} Q${xb},${yc} ${xb},${yc + s2 * r} V${y2 - s2 * r} Q${xb},${y2} ${xb + r},${y2} H${x2}`;
+}
+function pintar() {
+  svg.innerHTML = '';
+  for (const f of FASES) for (const [ids, debil] of [[f.dep, false], [f.debil || [], true]]) for (const d of ids) {
+    const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    p.setAttribute('d', camino(POR[d], f)); p.dataset.de = d; p.dataset.a = f.id;
+    p.setAttribute('class', 'e' + (debil ? ' debil' : '') + (hecha(d) && hecha(f.id) ? ' hecho' : hecha(d) && lista(f) ? ' hot' : ''));
+    if (debil) p.style.display = 'none';
+    svg.append(p);
+  }
+  for (const f of FASES) {
+    const n = nodos[f.id], e = est(f), ok = lista(f), cls = e === 'done' ? 'done' : e === 'curso' || e === 'pausa' ? e : ok ? (e === 'mine' ? 'avail mine' : 'avail') : (e === 'mine' ? 'mine lock' : 'lock');
+    n.className = 'nodo ' + cls + (f.opc ? ' opc' : '');
+    const tag = e === 'done' ? 'Completada' : e === 'curso' ? 'En curso' : e === 'pausa' ? 'En pausa' : ok ? (e === 'mine' ? 'Te toca' : 'Investigable') : faltaRec(f).length && f.dep.every(hecha) ? 'Falta recurso' : 'Bloqueada';
+    const reqs = (f.res || []).map(r => `<i class="${conseguidos.has(r) ? 'ok' : ''}" title="${REC[r].t}">${REC[r].ic}</i>`).join('');
+    n.innerHTML = `<span class="ico">${e === 'done' ? '✓' : ok || e === 'curso' || e === 'pausa' ? f.ic : '🔒'}</span><span><span class="t">${f.t}</span><span class="s"><span class="tag">${tag}</span>${TIPOS[f.k] ? `<span class="tipo" title="${TIPOS[f.k].d}">${TIPOS[f.k].ic} ${TIPOS[f.k].n}</span>` : ''}${f.opc ? '<span class="tag">Opcional</span>' : ''}${reqs ? `<span class="reqs">${reqs}</span>` : ''}</span></span>${SUB[f.id] ? barraSub(SUB[f.id]) : ''}`;
+    n.setAttribute('aria-label', f.t + ' · ' + tag);
+  }
+  const recs = document.getElementById('recursos'); recs.innerHTML = '';
+  for (const r of RECURSOS) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'rec' + (conseguidos.has(r.id) ? ' ok' : '');
+    b.innerHTML = `<span class="ic">${conseguidos.has(r.id) ? '✓' : r.ic}</span>${r.t}<small>· ${r.q}</small>`;
+    b.title = r.d + (conseguidos.has(r.id) ? ' · Toca para quitar «conseguido»' : ' · Toca para marcarlo como conseguido');
+    b.addEventListener('click', () => { conseguidos.has(r.id) ? conseguidos.delete(r.id) : conseguidos.add(r.id); guardar(); pintar(); if (actual) elegir(actual); });
+    recs.append(b);
+  }
+  const ya = document.getElementById('ya'); ya.innerHTML = '';
+  // En curso y en pausa van primero, cada uno con su grupo; después, lo investigable ahora (sin repetirlas).
+  const enCurso = FASES.filter(f => est(f) === 'curso'), enPausa = FASES.filter(f => est(f) === 'pausa');
+  const disp = FASES.filter(f => lista(f) && est(f) !== 'curso' && est(f) !== 'pausa');
+  if (!enCurso.length && !enPausa.length && !disp.length) ya.innerHTML = '<span class="vacio">Nada: todo espera a otra mejora o a un recurso.</span>';
+  for (const [titulo, grupo] of [['En curso', enCurso], ['En pausa', enPausa], ['Investigable ahora · en paralelo', disp]]) {
+    if (!grupo.length) continue;
+    const h = document.createElement('small'); h.className = 'grupo'; h.textContent = titulo; ya.append(h);
+    for (const f of grupo) {
+      const c = document.createElement('button'); c.type = 'button'; c.className = 'chip';
+      c.innerHTML = `<i style="background:${RAMA[f.r].c}"></i><span><b>${f.t}</b><small>${f.q}</small></span>`;
+      c.addEventListener('click', () => { elegir(f.id); nodos[f.id].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); });
+      ya.append(c);
+    }
+  }
+}
+
+const antes = (id, s = new Set()) => { for (const d of [...POR[id].dep, ...(POR[id].debil || [])]) if (!s.has(d)) { s.add(d); antes(d, s); } return s; };
+const despues = (id, s = new Set()) => { for (const f of FASES) if ([...f.dep, ...(f.debil || [])].includes(id) && !s.has(f.id)) { s.add(f.id); despues(f.id, s); } return s; };
+let actual = null;
+const chips = ids => ids.length ? ids.map(i => `<button type="button" class="chip" data-ir="${i}"><i style="background:${RAMA[POR[i].r].c}"></i>${POR[i].t}</button>`).join('') : '<span class="vacio">Ninguna</span>';
+function elegir(id) {
+  actual = id; const f = POR[id], A = antes(id), D = despues(id);
+  { const fi = document.getElementById('ficha'); fi.hidden = false; const lat = fi.closest('.lateral'); if (lat) lat.scrollTop = 0; }
+  arbol.classList.add('foco');
+  for (const g of FASES) { const n = nodos[g.id]; n.classList.toggle('sel', g.id === id); n.classList.toggle('antes', A.has(g.id)); n.classList.toggle('despues', D.has(g.id)); }
+  svg.querySelectorAll('path').forEach(p => {
+    const de = p.dataset.de, a = p.dataset.a, an = (a === id || A.has(a)) && A.has(de), dn = (de === id || D.has(de)) && D.has(a);
+    p.classList.toggle('antes', an); p.classList.toggle('despues', dn);
+    if (p.classList.contains('debil')) p.style.display = an || dn ? '' : 'none';
+  });
+  const e = est(f), ok = lista(f), sig = FASES.filter(x => x.dep.includes(id)).map(x => x.id), recom = FASES.filter(x => (x.debil || []).includes(id)).map(x => x.id);
+  const faltan = f.dep.filter(d => !hecha(d)), fr = faltaRec(f);
+  const estado = e === 'done' ? 'completada' : e === 'curso' ? 'en curso: se está trabajando ahora' : e === 'pausa' ? 'en pausa: empezada e interrumpida' : ok ? (e === 'mine' ? 'te toca, y se puede hacer ya' : 'investigable ahora') : 'bloqueada';
+  document.getElementById('ficha').innerHTML = `
+    <div class="cab"><span class="ico" style="background:${RAMA[f.r].c}">${e === 'done' ? '✓' : f.ic}</span><div><span class="rama" style="color:${RAMA[f.r].c}">${RAMA[f.r].n} · nivel ${f.nv}</span><h3>${f.t}</h3></div></div>
+    <p>${f.d}</p>
+    ${SUB[id] ? `<div class="sub-res">${barraSub(SUB[id])}<span class="nota">${resumenSub(SUB[id])}</span><button type="button" class="btn" id="versub">Ver subapartados</button></div>` : ''}
+    ${TIPOS[f.k] ? `<p><b>Tipo de trabajo:</b> ${TIPOS[f.k].ic} ${TIPOS[f.k].n}: ${TIPOS[f.k].d}${f.prox && e !== 'done' ? `<br><b>Siguiente resultado comprobable:</b> ${f.prox}` : ''}</p>` : ''}
+    <p><b>Quién:</b> ${f.q} · <b>Estado:</b> ${estado}${faltan.length ? ' · <b>falta antes:</b> ' + faltan.map(d => POR[d].t).join(', ') : ''}${fr.length ? ' · <b>falta el recurso:</b> ' + fr.map(r => REC[r].t + ' (' + REC[r].q + ')').join(', ') : ''}${f.opc ? ' · <b>opcional</b>: no bloquea el despliegue' : ''}</p>
+    <div class="grid2">
+      <div><b>Necesita antes</b><div class="l">${chips(f.dep)}${(f.res || []).map(r => `<span class="rec${conseguidos.has(r) ? ' ok' : ''}" style="cursor:default"><span class="ic">${conseguidos.has(r) ? '✓' : REC[r].ic}</span>${REC[r].t}</span>`).join('')}</div>${(f.debil || []).length ? `<b style="margin-top:10px">Mejor después de (línea discontinua)</b><div class="l">${chips(f.debil)}</div>` : ''}</div>
+      <div><b>Desbloquea</b><div class="l">${chips(sig)}</div>${recom.length ? `<b style="margin-top:10px">Conviene antes de</b><div class="l">${chips(recom)}</div>` : ''}</div>
+    </div>
+    <div class="btns">${f.e !== 'done' ? `<button type="button" class="btn" id="marcar">${hechas.has(id) ? 'Quitar «hecha»' : 'Marcar como hecha'}</button>` : ''}<button type="button" class="btn" id="todo">Ver todo el árbol</button></div>`;
+  document.querySelectorAll('#ficha [data-ir]').forEach(b => b.addEventListener('click', () => { elegir(b.dataset.ir); nodos[b.dataset.ir].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }));
+  document.getElementById('marcar')?.addEventListener('click', () => { hechas.has(id) ? hechas.delete(id) : hechas.add(id); guardar(); pintar(); elegir(id); });
+  document.getElementById('todo').addEventListener('click', soltar);
+  document.getElementById('versub')?.addEventListener('click', () => abrirSub(id));
+}
+function soltar() {
+  actual = null; arbol.classList.remove('foco');
+  for (const n of Object.values(nodos)) n.classList.remove('sel', 'antes', 'despues');
+  svg.querySelectorAll('path').forEach(p => { p.classList.remove('antes', 'despues'); if (p.classList.contains('debil')) p.style.display = 'none'; });
+  document.getElementById('ficha').innerHTML = '<p class="vacio">Toca una mejora del árbol para ver su ficha.</p>'; document.getElementById('ficha').hidden = true;
+}
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!velo.hidden) { cerrarSub(); return; } if (actual) soltar(); });
+maquetar();
+// Tema: Día, Esmeralda o Noche. Sigue el sistema (día o noche) hasta que se elige; la elección se recuerda en este navegador.
+const raiz=document.documentElement,TEMA='arbol-fases-capitool2:tema',TEMAS=['light','esmeralda','dark'];
+const efectivo=()=>TEMAS.includes(raiz.dataset.theme)?raiz.dataset.theme:(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+const marcar=()=>document.querySelectorAll('.tema').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===efectivo())));
+try{const t=localStorage.getItem(TEMA);if(TEMAS.includes(t))raiz.dataset.theme=t;}catch{}
+marcar();
+document.querySelectorAll('.tema').forEach(b=>b.addEventListener('click',()=>{raiz.dataset.theme=b.dataset.t;try{localStorage.setItem(TEMA,b.dataset.t);}catch{}marcar();}));
+matchMedia('(prefers-color-scheme: light)').addEventListener?.('change',marcar);
+</script>
