@@ -240,15 +240,15 @@ const RECURSOS = [
   {
     "id": "oauth",
     "ic": "G",
-    "t": "Configuración OAuth contrastada",
-    "q": "Arc / responsable de Cloud",
+    "t": "OAuth contrastado",
+    "q": "Arc",
     "d": "El plan y la guía local describen modalidades diferentes. Confirmar la configuración realmente aplicada y completar la documentación propia; no cambiar permisos por publicar el árbol.",
     "ok": false
   },
   {
     "id": "decisiones",
     "ic": "◆",
-    "t": "Decisiones previas al hub",
+    "t": "Decisiones del hub",
     "q": "Arc",
     "d": "Plan §10: respaldo de administración, acceso de tiendas a Sheets y módulo futuro; decisiones aún por confirmar. No ampliar permisos en esta ronda.",
     "ok": false
@@ -256,8 +256,8 @@ const RECURSOS = [
   {
     "id": "corte",
     "ic": "★",
-    "t": "Fecha y alcance del corte",
-    "q": "Arc y tiendas piloto",
+    "t": "Fecha de corte",
+    "q": "Arc y tiendas",
     "d": "Plan fases 6–7: decidir cuándo migrar y coordinar el uso de la versión 2.0. El árbol no autoriza ni ejecuta la migración.",
     "ok": false
   }
@@ -279,10 +279,10 @@ const FASES = [
     "ic": "0",
     "t": "Cerrar el arranque",
     "e": "pausa",
-    "q": "Equipo de CapiTool y Arc",
+    "q": "Equipo CapiTool",
     "k": "remate",
-    "d": "Fase 0 empezada: repositorio y Pages sirven el hub de espera; backend vivo responde 0.0.1. Falta conciliar OAuth/configuración y acreditar los criterios de ARRANQUE.md. No consta cierre aceptado.",
-    "prox": "Configuración propia completa y pruebas de arranque documentadas, sin contradicciones.",
+    "d": "Pages y backend 0.0.1 comprobados. OAuth y cierre de fase 0 pendientes (ARRANQUE.md).",
+    "prox": "Cierre de arranque documentado.",
     "dep": [],
     "res": [
       "oauth"
@@ -296,7 +296,7 @@ const FASES = [
     "ic": "1",
     "t": "API del backend",
     "e": "todo",
-    "q": "Equipo de CapiTool",
+    "q": "Equipo CapiTool",
     "k": "obra",
     "d": "Plan fase 1: autenticación, configuración, activación y filas con versión/LockService. El código principal es aún router vacío; no consta implementación de los handlers.",
     "prox": "Pruebas con datos ficticios acreditan autorización y conflicto 409 según el plan.",
@@ -312,7 +312,7 @@ const FASES = [
     "ic": "2",
     "t": "Core común",
     "e": "todo",
-    "q": "Equipo de CapiTool",
+    "q": "Equipo CapiTool",
     "k": "obra",
     "d": "Plan fase 2: login, llamadas, cola, caché, polling y UI compartida. El repositorio solo contiene el catálogo de tiendas; core.js/core.css y demo no constan.",
     "prox": "Demo ficticia funciona en dos navegadores y propaga un cambio en menos de 30 s.",
@@ -328,7 +328,7 @@ const FASES = [
     "ic": "3",
     "t": "Hub y administración",
     "e": "todo",
-    "q": "Equipo de CapiTool y Arc",
+    "q": "Equipo CapiTool",
     "k": "obra",
     "d": "Plan fase 3: acceso, selección de tienda, módulos activos y panel de administración. La entrada publicada es una página de espera; aún no acredita este hub funcional.",
     "prox": "Alta de prueba, aprobación y activación muestran el módulo conforme al plan.",
@@ -347,7 +347,7 @@ const FASES = [
     "ic": "4",
     "t": "Plantilla y Checklist",
     "e": "todo",
-    "q": "Equipo de CapiTool",
+    "q": "Equipo CapiTool",
     "k": "obra",
     "d": "Plan fase 4: plantilla común de módulo y Checklist con equipo/listas/progreso. No constan estos archivos en el principal.",
     "prox": "Checklist con datos ficticios funciona en dos dispositivos de prueba y permite arrancar un segundo módulo.",
@@ -363,10 +363,10 @@ const FASES = [
     "ic": "5",
     "t": "Cinco módulos",
     "e": "todo",
-    "q": "Equipo de CapiTool",
+    "q": "Equipo CapiTool",
     "k": "obra",
-    "d": "Plan fase 5: Entrenamientos, Procurement, Garantías, Ajustes y Xfer Reg. Son independientes tras la plantilla; el orden del plan es recomendable, no una cadena obligatoria.",
-    "prox": "Los seis módulos completos funcionan en el catálogo de prueba, con sus criterios documentados.",
+    "d": "Fase 5: cinco módulos independientes tras la plantilla; orden recomendado, no obligatorio (plan).",
+    "prox": "Seis módulos probados en catálogo ficticio.",
     "dep": [
       "f4"
     ]
@@ -379,7 +379,7 @@ const FASES = [
     "ic": "6",
     "t": "Ensayar migración",
     "e": "todo",
-    "q": "Equipo de CapiTool",
+    "q": "Equipo CapiTool",
     "k": "ensayo",
     "d": "Plan fase 6: herramienta solo admin, mapeadores, vista previa y lotes idempotentes. Construir y ensayar con fixtures ficticios; recuperar datos reales queda fuera de esta ronda.",
     "prox": "Dos importaciones de los mismos fixtures dejan idénticas filas y recuentos por módulo.",
